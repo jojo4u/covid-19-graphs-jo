@@ -26,7 +26,7 @@ import seaborn as sns
 
 csvpopfile =       './population/worldbank-population-2020-03-14.csv'
 csvpopstatesfile = './population/province_state-population-wikidata-2020-03-14.csv'
-csvfile =          './covid-19/time-series-19-covid-combined.csv'
+csvfile =          './covid-19-data/time-series-19-covid-combined.csv'
 
 plt.clf()
 

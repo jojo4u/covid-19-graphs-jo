@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar 13 18:38:35 2020
-
 @author: jo
 """
 
-startfromcase = 50  #starting plot from nths case
+start_from_case = 50  #starting plot from nths case
 #for per_capita plot
-capita = 100000     #divisor
-minpercapita = 4   #minimum ratio
-yearpop = '2018'    #column from World Bank data,
+capita = 100000      #divisor
+min_percapita = 4    #minimum ratio
+pop_year = '2018'     #column from World Bank data,
 #for confirmed and pct_change plot
-mincases = 1000     #only most affected countries 
+min_cases = 1000     #only most affected countries 
 #for pct_change plot
-movingaverage = 5   #smoothing 
+moving_average = 5   #smoothing 
 
-ignore_on_x_axis = "China"
+# Do not show all days from following countries
+ignore_on_x_axis = ["China"]
+# Cruise Ship has extreme numbers and skews graph
+ignore_countries = ["Cruise Ship"]
+# San Marino has extreme numbers and skews graph
+ignore_countries_percapita = ["San Marino"]
+
+skip_US_counties = True
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -24,11 +29,9 @@ import numpy as np
 import warnings
 import seaborn as sns
 
-csvpopfile =       './population/worldbank-population-2020-03-14.csv'
-csvpopstatesfile = './population/province_state-population-wikidata-2020-03-14.csv'
-csvfile =          './covid-19-data/time-series-19-covid-combined.csv'
-
-plt.clf()
+csv_pop_countries_file = './population/worldbank-population-2020-03-14.csv'
+csv_pop_provinces_file = './population/province_state-population-2020-03-15.csv'
+csv_file = './covid-19-data/time-series-19-covid-combined.csv'
 
 def smooth(y, box_pts):
     box = np.ones(box_pts)/box_pts
@@ -43,100 +46,103 @@ def has_duplicates(iterable):
         seen.add(x)
     return False
 
-dfpop =       pd.read_csv(csvpopfile,index_col=0,usecols=['Country Name (JHU CSSE)','2018'])
-dfpopstates = pd.read_csv(csvpopstatesfile,index_col=[0,1])
-df =          pd.read_csv(csvfile)
+df_pop_countries = pd.read_csv(csv_pop_countries_file,index_col=0,usecols=['Country Name (JHU CSSE)','2018'])
+df_pop_provinces = pd.read_csv(csv_pop_provinces_file,index_col=[0,1])
+df_source = pd.read_csv(csv_file)
 
 # replace forward slash which cant referenced in column names 
-cols = df.columns
+cols = df_source.columns
 cols = cols.map(lambda x: x.replace('/', '_')) 
-df.columns = cols
+df_source.columns = cols
 
 # dop unused columns
-df = df.drop(columns=['Lat', 'Long'])
+df_source = df_source.drop(columns=['Lat', 'Long'])
 
 # removing all entries lower than 100 cases
-df = df.query('Confirmed >= @startfromcase') 
+df_source = df_source.query('Confirmed >= @start_from_case') 
 
+#removing ignored countries
+df_source = df_source[~df_source['Country_Region'].isin(ignore_countries)]
+
+#df_result is used for filtered/processed data
 df_result = pd.DataFrame()
 
 #per_capita
 #per_capita provinces
-xlim = 0  # limiting x-axis (depending on ignore_on_x_axis) 
+limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
 lines = 0 # for color compuation
-df_tempprovinces = df
-df_capitarows = pd.DataFrame()
-for nametuple,df_countrystate in df_tempprovinces.groupby(['Country_Region','Province_State'],sort=False):
+dftemp_provinces = df_source
+dftemp_capita_rows = pd.DataFrame()
+for nametuple,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
     if has_duplicates(nametuple): # skip mainlands (covered by countries)
         continue
-    if (nametuple[0] == "US" and ',' in nametuple[1]): # skip US counties (comma in name)
-        continue
-    if (nametuple in dfpopstates.index):
-        population = dfpopstates.loc[nametuple]['Population']
+    if skip_US_counties:
+        if (nametuple[0] == "US" and ',' in nametuple[1]): # US counties have comma in name
+            continue
+    if (nametuple in df_pop_provinces.index):
+        population = df_pop_provinces.loc[nametuple]['Population']
     else:
         population = np.nan
-        warnings.warn(f"Population for {nametuple} not found in {csvpopfile}")
+        warnings.warn(f"Population for {nametuple} not found in {csv_pop_provinces_file}")
     #print(nametuple,population)
-    df_temp = pd.DataFrame()
-    df_temp["Confirmed (percapita)"] = df_countrystate.Confirmed / (population/capita)
-    per_capita_max = df_temp["Confirmed (percapita)"].max()
-    df_temp["name"] = nametuple[0] + ' - ' + nametuple[1]
-    if (per_capita_max >= minpercapita):
-        df_capitarows = df_capitarows.append(df_temp)
+    dftemp = pd.DataFrame()
+    dftemp["Confirmed (percapita)"] = df_countrystate.Confirmed / (population/capita)
+    dftemp["name"] = nametuple[0] + ' - ' + nametuple[1]
+    per_capita_max = dftemp["Confirmed (percapita)"].max()
+    if (per_capita_max >= min_percapita):
+        dftemp_capita_rows = dftemp_capita_rows.append(dftemp)
         lines += 1
         if not nametuple[0] in ignore_on_x_axis:
-            xlim = df_temp.count()[0] if df_temp.count()[0] > xlim else xlim
+            limit_x = dftemp.count()[0] if dftemp.count()[0] > limit_x else limit_x
 
-df_tempprovinces = pd.merge(df_tempprovinces,df_capitarows,left_index=True,right_index=True)
-df_result = df_result.append(df_tempprovinces)
+dftemp_provinces = pd.merge(dftemp_provinces,dftemp_capita_rows,left_index=True,right_index=True)
+df_result = df_result.append(dftemp_provinces)
 
 #per_capita countries
+dftemp_countries = df_source
+dftemp_countries = dftemp_countries[~dftemp_countries['Country_Region'].isin(ignore_countries_percapita)]
 # drop provinces/states column
-df_tempcountries = df.query('Country_Region != "San Marino"')
+dftemp_countries = dftemp_countries.drop(columns=['Province_State'])
 # sum up states 
-df_tempcountries = df_tempcountries.drop(columns=['Province_State']).groupby(['Country_Region','Date'],sort=False,as_index=False).sum()
+dftemp_countries = dftemp_countries.groupby(['Country_Region','Date'],sort=False,as_index=False).sum()
 
-df_capitarows = pd.DataFrame()
-for name,df_country in df_tempcountries.groupby('Country_Region',sort=False):
-    if (name in dfpop.index):
-        population = dfpop.loc[name][yearpop]
+dftemp_capita_rows = pd.DataFrame()
+for name,df_country in dftemp_countries.groupby('Country_Region',sort=False):
+    if (name in df_pop_countries.index):
+        population = df_pop_countries.loc[name][pop_year]
     else:
         population = np.nan
-        warnings.warn(f"Population for {name} not found in {csvpopfile}")
-    df_temp = pd.DataFrame()
-    df_temp["Confirmed (percapita)"] = df_country.Confirmed / (population/capita)
-    per_capita_max = df_temp["Confirmed (percapita)"].max()
-    df_temp["name"] = name
-    if (per_capita_max >= minpercapita):
-        df_capitarows = df_capitarows.append(df_temp)
+        warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}")
+    dftemp = pd.DataFrame()
+    dftemp["Confirmed (percapita)"] = df_country.Confirmed / (population/capita)
+    dftemp["name"] = name
+    per_capita_max = dftemp["Confirmed (percapita)"].max()
+    if (per_capita_max >= min_percapita):
+        dftemp_capita_rows = dftemp_capita_rows.append(dftemp)
         lines += 1
         if not name in ignore_on_x_axis:
-            xlim = df_temp.count()[0] if df_temp.count()[0] > xlim else xlim
+            limit_x = dftemp.count()[0] if dftemp.count()[0] > limit_x else limit_x
 
 # inner join with results from per capita calculation
-df_tempcountries = pd.merge(df_tempcountries,df_capitarows,left_index=True,right_index=True)
-df_result = df_result.append(df_tempcountries)
+dftemp_countries = pd.merge(dftemp_countries,dftemp_capita_rows,left_index=True,right_index=True)
+df_result = df_result.append(dftemp_countries)
 
-# need to limiting data to xlim before sorting
-df_templimit = pd.DataFrame()
+# need to limiting data to limit_x before sorting
+dftemp_limit = pd.DataFrame()
 for name,df_country in df_result.groupby('name',sort=False):
-     df_country = df_country.head(xlim)
+     df_country = df_country.head(limit_x)
      #recalulate percapita max for better order in legend
      df_country["Confirmed (percapita max)"] = df_country["Confirmed (percapita)"].max()
-     df_templimit = df_templimit.append(df_country)
+     dftemp_limit = dftemp_limit.append(df_country)
 
-df_result = df_templimit            
+df_result = dftemp_limit            
 # sort by maximum ratio for sorted legend
 df_result = df_result.sort_values(by=["Confirmed (percapita max)",'name','Date'],ascending=[False,True,True],ignore_index=True)
 
 # plot combined country/province data
-
-#sns.set() 
-#sns.axes_style("ticks")
-#sns.set_palette(sns.color_palette('husl', lines+6))
+#alternative palettes recommendations: copper spring
 sns.set_palette(sns.color_palette('Oranges_d', lines))
 sns.set_style("ticks")
-#copper spring copper
 
 for name,df_country in df_result.groupby('name',sort=False):
     #print(name,df_country["Confirmed (percapita)"].max())
@@ -144,19 +150,15 @@ for name,df_country in df_result.groupby('name',sort=False):
     x = np.arange(df_country.Date.count())
     y = df_country["Confirmed (percapita)"]
 
-    annotatex=df_country.Date.count()-1 #last one (index 0)
-    annotatey=df_country["Confirmed (percapita)"].iloc[-1] #last one
-    plt.annotate(name, xy=(annotatex, annotatey))
+    annotate_x=df_country.Date.count()-1 #last one (index 0)
+    annotate_y=df_country["Confirmed (percapita)"].iloc[-1] #last one
+    plt.annotate(name, xy=(annotate_x, annotate_y))
 
     ax = plt.plot(x, y,label=name)
     
- 
-
-
-
-plt.xlabel(f'Days since {startfromcase}th case')
-plt.ylabel(f'Cases per {capita} capita (mininum {minpercapita})') 
-plt.xticks(np.arange(xlim))
+plt.xlabel(f'Days since {start_from_case}th case')
+plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
+plt.xticks(np.arange(limit_x))
 plt.legend(loc='upper left',ncol=2,framealpha=1)
 plt.grid(axis='y')
 plt.show()
@@ -164,18 +166,18 @@ plt.show()
 """
 #pct_change
 for name,df_country in df_grouped:
-    if (df_country.Confirmed.max() > mincases): # removing all countries with fewer than mincases
-        df_country = df_country.head(xlim) # limiting data to xlim
+    if (df_country.Confirmed.max() > min_cases): # removing all countries with fewer than min_cases
+        df_country = df_country.head(limit_x) # limiting data to limit_x
         x = np.arange(df_country.Date.count())
         y = df_country.Confirmed.pct_change() * 100
-        y = smooth(y,movingaverage)
+        y = smooth(y,moving_average)
         #y = group.Confirmed
         plt.plot(x, y,label=name)
 
-plt.xlim(right=xlim)
+plt.limit_x(right=limit_x)
 plt.xlabel('Days since 100th case')
-plt.ylabel(f'Percent daily grow (moving average {movingaverage})') 
-plt.xticks(np.arange(xlim))
+plt.ylabel(f'Percent daily grow (moving average {moving_average})') 
+plt.xticks(np.arange(limit_x))
 plt.legend()
 plt.show()
 """
@@ -183,16 +185,16 @@ plt.show()
 """
 #confirmed
 for name,df_country in df_grouped:
-    if (df_country.Confirmed.max() > mincases): # removing all countries with fewer than mincases
-        df_country = df_country.head(xlim) # limiting data to xlim
+    if (df_country.Confirmed.max() > min_cases): # removing all countries with fewer than min_cases
+        df_country = df_country.head(limit_x) # limiting data to limit_x
         x = np.arange(df_country.Date.count())
         y = df_country.Confirmed
         plt.plot(x, y,label=name)
 
-plt.xlim(right=xlim)
+plt.limit_x(right=limit_x)
 plt.xlabel('Days since 100th case')
 plt.ylabel('Confirmed COVID-19 cases') 
-plt.xticks(np.arange(xlim))
+plt.xticks(np.arange(limit_x))
 plt.legend()
 plt.show()
 """

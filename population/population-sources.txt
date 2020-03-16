@@ -3,4 +3,5 @@ https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.h
 https://eng.stat.gov.tw/point.asp?index=9
 https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
 https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
 

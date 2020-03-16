@@ -15,7 +15,7 @@ min_cases = 1000     #only most affected countries
 moving_average = 5   #smoothing 
 
 # Do not show all days from following countries
-ignore_on_x_axis = ["China"]
+ignore_on_x_axis = ["China","Singapore"]
 # Cruise Ship has extreme numbers and skews graph
 ignore_countries = ["Cruise Ship"]
 # San Marino has extreme numbers and skews graph
@@ -30,7 +30,7 @@ import warnings
 import seaborn as sns
 
 csv_pop_countries_file = './population/worldbank-population-2020-03-14.csv'
-csv_pop_provinces_file = './population/province_state-population-2020-03-15.csv'
+csv_pop_provinces_file = './population/province_state-population-2020-03-16.csv'
 csv_file = './covid-19-data/time-series-19-covid-combined.csv'
 
 def smooth(y, box_pts):

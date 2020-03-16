@@ -143,11 +143,13 @@ df_result = dftemp_limit
 # sort by maximum ratio for sorted legend
 df_result = df_result.sort_values(by=["Confirmed (percapita max)",'name','Date'],ascending=[False,True,True],ignore_index=True)
 
+
 # plot combined country/province data
-fig, ax = plt.subplots(1,1)
-#alternative palettes recommendations: copper spring
-sns.set_palette(sns.color_palette('Oranges_d', lines))
-sns.set_style("ticks")
+# palettes recommendations:
+#   YlOrBr_d OrRd_d Oranges_d copper RdPu_d magma viridis plasma spring 
+sns.set_palette(sns.color_palette('YlOrBr_d', lines))
+sns.set_style("ticks") 
+fig, ax = plt.subplots(1,1) 
 
 for name,df_country in df_result.groupby('name',sort=False):
     #print(name,df_country["Confirmed (percapita)"].max())
@@ -160,7 +162,8 @@ for name,df_country in df_result.groupby('name',sort=False):
     plt.annotate(name, xy=(annotate_x, annotate_y))
 
     plt.plot(x, y,label=name)
-    
+
+  
 plt.xlabel(f'Days since {start_from_case}th case')
 plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
 plt.xticks(np.arange(limit_x))

@@ -4,11 +4,11 @@
 @author: jo
 """
 
-start_from_case = 50  #starting plot from nths case
+start_from_case = 50 #starting plot from nths case
 #for per_capita plot
 capita = 100000      #divisor
-min_percapita = 4    #minimum ratio
-pop_year = '2018'     #column from World Bank data,
+min_percapita = 5    #minimum ratio
+pop_year = '2018'    #column from World Bank data,
 #for confirmed and pct_change plot
 min_cases = 1000     #only most affected countries 
 #for pct_change plot
@@ -25,6 +25,7 @@ skip_US_counties = True
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 import warnings
 import seaborn as sns
@@ -32,6 +33,8 @@ import seaborn as sns
 csv_pop_countries_file = './population/worldbank-population-2020-03-14.csv'
 csv_pop_provinces_file = './population/province_state-population-2020-03-16.csv'
 csv_file = './covid-19-data/time-series-19-covid-combined.csv'
+
+fig, ax = plt.subplots(1,1)
 
 def smooth(y, box_pts):
     box = np.ones(box_pts)/box_pts
@@ -66,6 +69,9 @@ df_source = df_source[~df_source['Country_Region'].isin(ignore_countries)]
 
 #df_result is used for filtered/processed data
 df_result = pd.DataFrame()
+
+#statistics
+print(f"Using {csv_file}, latest data from",df_source.Date.max())
 
 #per_capita
 #per_capita provinces
@@ -154,11 +160,13 @@ for name,df_country in df_result.groupby('name',sort=False):
     annotate_y=df_country["Confirmed (percapita)"].iloc[-1] #last one
     plt.annotate(name, xy=(annotate_x, annotate_y))
 
-    ax = plt.plot(x, y,label=name)
+    plt.plot(x, y,label=name)
     
 plt.xlabel(f'Days since {start_from_case}th case')
 plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
 plt.xticks(np.arange(limit_x))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
 plt.legend(loc='upper left',ncol=2,framealpha=1)
 plt.grid(axis='y')
 plt.show()

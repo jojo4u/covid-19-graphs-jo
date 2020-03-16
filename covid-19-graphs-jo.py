@@ -15,7 +15,7 @@ min_cases = 1000     #only most affected countries
 moving_average = 5   #smoothing 
 
 # Do not show all days from following countries
-ignore_on_x_axis = ["China","Singapore"]
+ignore_on_x_axis = ["China","Singapore","Korea, South"]
 # Cruise Ship has extreme numbers and skews graph
 ignore_countries = ["Cruise Ship"]
 # San Marino has extreme numbers and skews graph
@@ -33,8 +33,6 @@ import seaborn as sns
 csv_pop_countries_file = './population/worldbank-population-2020-03-14.csv'
 csv_pop_provinces_file = './population/province_state-population-2020-03-16.csv'
 csv_file = './covid-19-data/time-series-19-covid-combined.csv'
-
-fig, ax = plt.subplots(1,1)
 
 def smooth(y, box_pts):
     box = np.ones(box_pts)/box_pts
@@ -146,6 +144,7 @@ df_result = dftemp_limit
 df_result = df_result.sort_values(by=["Confirmed (percapita max)",'name','Date'],ascending=[False,True,True],ignore_index=True)
 
 # plot combined country/province data
+fig, ax = plt.subplots(1,1)
 #alternative palettes recommendations: copper spring
 sns.set_palette(sns.color_palette('Oranges_d', lines))
 sns.set_style("ticks")
@@ -164,7 +163,8 @@ for name,df_country in df_result.groupby('name',sort=False):
     
 plt.xlabel(f'Days since {start_from_case}th case')
 plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
-plt.xticks(np.arange(limit_x))
+plt.margins(x=0)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
 ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
 plt.legend(loc='upper left',ncol=2,framealpha=1)

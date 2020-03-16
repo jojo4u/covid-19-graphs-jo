@@ -163,8 +163,7 @@ for name,df_country in df_result.groupby('name',sort=False):
     
 plt.xlabel(f'Days since {start_from_case}th case')
 plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
-plt.margins(x=0)
-ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+plt.xticks(np.arange(limit_x))
 ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
 ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
 plt.legend(loc='upper left',ncol=2,framealpha=1)

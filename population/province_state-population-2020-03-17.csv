@@ -1,7 +1,24 @@
 Country,Province_State,Population
-Australia,New South Wales,8089526
-Canada,British Columbia,4648055
-Canada,Ontario,13448494
+Australia,Australia,8089526
+Australia,New South Wales,809952
+Australia,Queensland,5095100
+Australia,South Australia,1751693
+Australia,Tasmania,534281
+Australia,Victoria,6594804
+Australia,Western Australia,2621680
+Canada,Ontario,14659616
+Canada,Quebec,8522800
+Canada,British Columbia,5105576
+Canada,Alberta,4395586
+Canada,Manitoba,1373859
+Canada,Saskatchewan,1178657
+Canada,Nova Scotia,976768
+Canada,New Brunswick,780021
+Canada,Newfoundland and Labrador,521922
+Canada,Prince Edward Island,157901
+Canada,Northwest Territories,44895
+Canada,Nunavut,38873
+Canada,Yukon,41022
 China,Anhui,62550000
 China,Beijing,21710000
 China,Chongqing,30750000
@@ -33,14 +50,14 @@ China,Xinjiang,24450000
 China,Yunnan,48010000
 China,Zhejiang,56570000
 US,Alabama,4903185
-US,Alaska,732
+US,Alaska,731545
 US,Arizona,7278717
 US,Arkansas,3017804
 US,California,39512223
 US,Colorado,5758736
 US,Connecticut,3565287
-US,Delaware,974
-US,District of Columbia,706
+US,Delaware,973764
+US,District of Columbia,705749
 US,Florida,21477737
 US,Georgia,10617423
 US,Hawaii,1415872
@@ -66,20 +83,21 @@ US,New Jersey,8882190
 US,New Mexico,2096829
 US,New York,19453561
 US,North Carolina,10488084
-US,North Dakota,762
+US,North Dakota,762062
 US,Ohio,11689100
 US,Oklahoma,3956971
 US,Oregon,4217737
 US,Pennsylvania,12801989
 US,Rhode Island,1059361
 US,South Carolina,5148714
-US,South Dakota,885
+US,South Dakota,884659
 US,Tennessee,6829174
 US,Texas,28995881
 US,Utah,3205958
-US,Vermont,624
+US,Vermont,623989
 US,Virginia,8535519
 US,Washington,7614893
 US,West Virginia,1792147
 US,Wisconsin,5822434
-US,Wyoming,579
+US,Wyoming,578759
+US,Puerto Rico,3193694

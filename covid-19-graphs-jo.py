@@ -5,22 +5,25 @@
 """
 
 start_from_confirmed = 50 #starting plot from nths case
-start_from_deaths = 1 
+start_from_deaths =     1 #starting plot from nths death
 #for per_capita plot
-capita_confirmed = 100000      #divisor on confirmed cases
-capita_deaths = 1000000    #divisor on deaths
-min_percapita_confirmed = 5    #minimum ratio on confirmed cases
-min_percapita_deaths = 1     #minimum ration on deaths
+capita_confirmed =  100000      #divisor on confirmed cases
+capita_deaths =    1000000    #divisor on deaths
+min_percapita_confirmed = 6    #minimum ratio on confirmed cases
+min_percapita_deaths =    1     #minimum ration on deaths
 pop_year = '2018'    #column from World Bank data,
 #for confirmed and pct_change plot
-min_cases = 1000     #only most affected countries 
+min_cases_confirmed = 1000     #only most affected countries 
+min_cases_deaths = 10
 #for pct_change plot
-moving_average = 5   #smoothing 
+moving_average = 9   #smoothing 
 
-capita = capita_confirmed
-min_percapita = min_percapita_confirmed
-start_from = start_from_confirmed
-row = 'Confirmed'
+capita = capita_deaths
+min_percapita = min_percapita_deaths
+start_from = start_from_deaths
+row = 'Deaths'
+row_stringoutput = "deaths"
+min_cases = min_cases_deaths
 
 # Do not show all days from following countries
 ignore_on_x_axis = ['China','Singapore','Korea, South']
@@ -30,6 +33,7 @@ ignore_countries = ['Cruise Ship']
 ignore_countries_percapita = ['San Marino']
 
 skip_US_counties = True
+limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -79,13 +83,13 @@ df_result = pd.DataFrame()
 #statistics
 print(f"Using {csv_file}, latest data from",df_source.Date.max())
 
-#per_capita
 
-limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
+
+#per_capita
 lines = 0 # for color compuation
 
 #per_capita provinces
-dftemp_provinces = df_source
+dftemp_provinces = df_source.copy()
 dftemp_capita_rows = pd.DataFrame()
 for nametuple,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
     if has_duplicates(nametuple): # skip mainlands (covered by countries)
@@ -113,7 +117,7 @@ dftemp_provinces = pd.merge(dftemp_provinces,dftemp_capita_rows,left_index=True,
 df_result = df_result.append(dftemp_provinces)
 
 #per_capita countries
-dftemp_countries = df_source
+dftemp_countries = df_source.copy()
 dftemp_countries = dftemp_countries[~dftemp_countries['Country_Region'].isin(ignore_countries_percapita)]
 # drop provinces/states column
 dftemp_countries = dftemp_countries.drop(columns=['Province_State'])
@@ -144,13 +148,17 @@ df_result = df_result.append(dftemp_countries)
 # need to limiting data to limit_x before sorting
 dftemp_limit = pd.DataFrame()
 for name,df_country in df_result.groupby('name',sort=False):
+     # copy to avoid SettingWithCopyWarning
+     df_country = df_country.copy()
+     # limit x-axis
      df_country = df_country.head(limit_x)
      #recalulate percapita max for better order in legend
      df_country[(row + ' (percapita max)')] = df_country[(row + ' (percapita)')].max()
+     #df_country.assign((row + ' (percapita max)') = (df_country[(row + ' (percapita)')].max()))
      dftemp_limit = dftemp_limit.append(df_country)
 
 df_result = dftemp_limit            
-# sort by maximum ratio for sorted legend
+# sort by maximum ratio for a sorted legend
 df_result = df_result.sort_values(by=[(row + ' (percapita max)'),'name','Date'],ascending=[False,True,True],ignore_index=True)
 
 # plot combined country/province data
@@ -172,8 +180,9 @@ for name,df_country in df_result.groupby('name',sort=False):
 
     plt.plot(x, y,label=name)
 
-plt.xlabel(f"Days since {start_from}th {row}")
-plt.ylabel(f"{row} per {capita} capita (mininum {min_percapita})") 
+plt.title(f"COVID-19 {row_stringoutput} per capita by country")
+plt.xlabel(f"Days since {start_from}th {row_stringoutput}")
+plt.ylabel(f"{row_stringoutput} per {capita} capita (mininum {min_percapita})") 
 plt.xticks(np.arange(limit_x))
 if (row == 'Confirmed'):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
@@ -184,20 +193,27 @@ plt.show()
 
 """
 #pct_change
-for name,df_country in df_grouped:
-    if (df_country.Confirmed.max() > min_cases): # removing all countries with fewer than min_cases
+# sum up states 
+limit_x = 60
+dftemp_pct = df_source.groupby(['Country_Region','Date'],sort=False,as_index=False).sum()
+
+for name,df_country in dftemp_pct.groupby('Country_Region',sort=False):
+    if (df_country.Deaths.max() > min_cases): # removing all countries with fewer than min_cases
         df_country = df_country.head(limit_x) # limiting data to limit_x
         x = np.arange(df_country.Date.count())
-        y = df_country.Confirmed.pct_change() * 100
+        y = df_country.Deaths.pct_change() * 100
         y = smooth(y,moving_average)
         #y = group.Confirmed
+        annotate_x=max(x) #last one (index 0)
+        annotate_y=y[-1] #last one
+        plt.annotate(name, xy=(annotate_x, annotate_y))
         plt.plot(x, y,label=name)
 
-plt.limit_x(right=limit_x)
-plt.xlabel("Days since 100th case")
-plt.ylabel(f"Percent daily grow (moving average {moving_average})") 
+plt.xlabel(f"Days since {start_from}th {row_stringoutput}")
+plt.ylabel(f"Percent daily grow of {row_stringoutput} (moving average {moving_average})") 
 plt.xticks(np.arange(limit_x))
-plt.legend()
+plt.legend(loc='upper right',ncol=2,framealpha=1)
+plt.grid(axis='y')
 plt.show()
 """
 

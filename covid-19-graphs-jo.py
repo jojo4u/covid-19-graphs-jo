@@ -4,15 +4,23 @@
 @author: jo
 """
 
-start_from_case = 50 #starting plot from nths case
+start_from_confirmed = 50 #starting plot from nths case
+start_from_deaths = 1 
 #for per_capita plot
-capita = 100000      #divisor
-min_percapita = 5    #minimum ratio
+capita_confirmed = 100000      #divisor on confirmed cases
+capita_deaths = 1000000    #divisor on deaths
+min_percapita_confirmed = 5    #minimum ratio on confirmed cases
+min_percapita_deaths = 1     #minimum ration on deaths
 pop_year = '2018'    #column from World Bank data,
 #for confirmed and pct_change plot
 min_cases = 1000     #only most affected countries 
 #for pct_change plot
 moving_average = 5   #smoothing 
+
+capita = capita_confirmed
+min_percapita = min_percapita_confirmed
+start_from = start_from_confirmed
+row = "Confirmed"
 
 # Do not show all days from following countries
 ignore_on_x_axis = ["China","Singapore","Korea, South"]
@@ -31,7 +39,7 @@ import warnings
 import seaborn as sns
 
 csv_pop_countries_file = './population/worldbank-population-2020-03-14.csv'
-csv_pop_provinces_file = './population/province_state-population-2020-03-16.csv'
+csv_pop_provinces_file = './population/province_state-population-2020-03-17.csv'
 csv_file = './covid-19-data/time-series-19-covid-combined.csv'
 
 def smooth(y, box_pts):
@@ -59,8 +67,8 @@ df_source.columns = cols
 # dop unused columns
 df_source = df_source.drop(columns=['Lat', 'Long'])
 
-# removing all entries lower than 100 cases
-df_source = df_source.query('Confirmed >= @start_from_case') 
+# removing all entries lower than start_from
+df_source = df_source.query(row + " >= @start_from") 
 
 #removing ignored countries
 df_source = df_source[~df_source['Country_Region'].isin(ignore_countries)]
@@ -72,9 +80,11 @@ df_result = pd.DataFrame()
 print(f"Using {csv_file}, latest data from",df_source.Date.max())
 
 #per_capita
-#per_capita provinces
+
 limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
 lines = 0 # for color compuation
+
+#per_capita provinces
 dftemp_provinces = df_source
 dftemp_capita_rows = pd.DataFrame()
 for nametuple,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
@@ -90,9 +100,9 @@ for nametuple,df_countrystate in dftemp_provinces.groupby(['Country_Region','Pro
         warnings.warn(f"Population for {nametuple} not found in {csv_pop_provinces_file}")
     #print(nametuple,population)
     dftemp = pd.DataFrame()
-    dftemp["Confirmed (percapita)"] = df_countrystate.Confirmed / (population/capita)
+    dftemp[(row + " (percapita)")] = df_countrystate[row] / (population/capita)
     dftemp["name"] = nametuple[0] + ' - ' + nametuple[1]
-    per_capita_max = dftemp["Confirmed (percapita)"].max()
+    per_capita_max = dftemp[(row + " (percapita)")].max()
     if (per_capita_max >= min_percapita):
         dftemp_capita_rows = dftemp_capita_rows.append(dftemp)
         lines += 1
@@ -118,9 +128,9 @@ for name,df_country in dftemp_countries.groupby('Country_Region',sort=False):
         population = np.nan
         warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}")
     dftemp = pd.DataFrame()
-    dftemp["Confirmed (percapita)"] = df_country.Confirmed / (population/capita)
+    dftemp[(row + " (percapita)")] = df_country[row] / (population/capita)
     dftemp["name"] = name
-    per_capita_max = dftemp["Confirmed (percapita)"].max()
+    per_capita_max = dftemp[(row + " (percapita)")].max()
     if (per_capita_max >= min_percapita):
         dftemp_capita_rows = dftemp_capita_rows.append(dftemp)
         lines += 1
@@ -136,13 +146,12 @@ dftemp_limit = pd.DataFrame()
 for name,df_country in df_result.groupby('name',sort=False):
      df_country = df_country.head(limit_x)
      #recalulate percapita max for better order in legend
-     df_country["Confirmed (percapita max)"] = df_country["Confirmed (percapita)"].max()
+     df_country[(row + " (percapita max)")] = df_country[(row + " (percapita)")].max()
      dftemp_limit = dftemp_limit.append(df_country)
 
 df_result = dftemp_limit            
 # sort by maximum ratio for sorted legend
-df_result = df_result.sort_values(by=["Confirmed (percapita max)",'name','Date'],ascending=[False,True,True],ignore_index=True)
-
+df_result = df_result.sort_values(by=[(row + " (percapita max)"),'name','Date'],ascending=[False,True,True],ignore_index=True)
 
 # plot combined country/province data
 # palettes recommendations:
@@ -155,20 +164,20 @@ for name,df_country in df_result.groupby('name',sort=False):
     #print(name,df_country["Confirmed (percapita)"].max())
     lines += 1
     x = np.arange(df_country.Date.count())
-    y = df_country["Confirmed (percapita)"]
+    y = df_country[(row + " (percapita)")]
 
     annotate_x=df_country.Date.count()-1 #last one (index 0)
-    annotate_y=df_country["Confirmed (percapita)"].iloc[-1] #last one
+    annotate_y=df_country[(row + " (percapita)")].iloc[-1] #last one
     plt.annotate(name, xy=(annotate_x, annotate_y))
 
     plt.plot(x, y,label=name)
 
-  
-plt.xlabel(f'Days since {start_from_case}th case')
-plt.ylabel(f'Cases per {capita} capita (mininum {min_percapita})') 
+plt.xlabel(f'Days since {start_from}th {row}')
+plt.ylabel(f'{row} per {capita} capita (mininum {min_percapita})') 
 plt.xticks(np.arange(limit_x))
-ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
-ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
+if (row == "Confirmed"):
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
 plt.legend(loc='upper left',ncol=2,framealpha=1)
 plt.grid(axis='y')
 plt.show()

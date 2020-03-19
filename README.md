@@ -1,12 +1,9 @@
 # covid-19-graphs-jo
-COVID-19 graph - especially cases per capita and growth.
+COVID-19 graphs - especially cases per capita and growth.
 
 ![COVID-19 confirmed per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/per_capita-confirmed-latest.png)
 
 ![COVID-19 deaths per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/per_capita-deaths-latest.png)
-
-
-
 
 ## Run
 ```

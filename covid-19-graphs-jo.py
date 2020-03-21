@@ -3,13 +3,13 @@
 """
 @author: jo
 """
-row = "Confirmed"
+row = "Deaths" # Confirmed or Deaths
 
 if (row == "Confirmed"):
     # for per_capita plot:
     start_from = 50     #starting plot from nths case
     capita =  100000    #divisor on confirmed cases
-    min_percapita = 7   #minimum ratio of confirmed cases
+    min_percapita = 8   #minimum ratio of confirmed cases
     row_stringoutput_plural = "confirmed cases" 
     row_stringoutput_singular = "confirmed case"
     
@@ -38,7 +38,9 @@ ignore_countries = ['Cruise Ship']
 # San Marino has extreme numbers and skews graph
 ignore_countries_percapita = ['San Marino']
 # Always add following countries
-force_countries = ['Germany','Austria','Switzerland','France','Canada','US']
+force_countries = ['Germany','Austria','Switzerland','France','Canada','US','Italy','Spain','Korea, South']
+#force_countries = ['US']
+only_forced_countries = False
 
 skip_US_counties = True
 limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
@@ -47,6 +49,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
+import math
 import warnings
 import seaborn as sns
 
@@ -95,31 +98,31 @@ actually_forced_countries = []
 actually_ignored_on_x_axis = []
 
 #per_capita
-lines = 0 # for color compuation
+lines = 0 #for color computation
 
 #per_capita provinces
 dftemp_provinces = df_source.copy()
 dftemp_capita_rows = pd.DataFrame()
-for nametuple,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
-    if has_duplicates(nametuple): # skip mainlands (covered by countries)
+for country_province_nametpl,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
+    if has_duplicates(country_province_nametpl): # skip mainlands (covered by countries)
         continue
     if skip_US_counties:
-        if (nametuple[0] == "US" and "," in nametuple[1]): # US counties have comma in name
+        if (country_province_nametpl[0] == "US" and "," in country_province_nametpl[1]): # US counties have comma in name
             continue
-    if (nametuple in df_pop_provinces.index):
-        population = df_pop_provinces.loc[nametuple]['Population']
+    if (country_province_nametpl in df_pop_provinces.index):
+        population = df_pop_provinces.loc[country_province_nametpl]['Population']
     else:
         population = np.nan
-        warnings.warn(f"Population for {nametuple} not found in {csv_pop_provinces_file}")
+        warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}")
     #print(nametuple,population)
     dftemp = pd.DataFrame()
     dftemp[(row + ' (percapita)')] = df_countrystate[row] / (population/capita)
-    dftemp['name'] = nametuple[0] + " - " + nametuple[1]
+    dftemp['name'] = country_province_nametpl[0] + " - " + country_province_nametpl[1]
     per_capita_max = dftemp[(row + ' (percapita)')].max()
     if (per_capita_max >= min_percapita):
         dftemp_capita_rows = dftemp_capita_rows.append(dftemp)
         lines += 1
-        if not nametuple[0] in ignore_on_x_axis:
+        if not country_province_nametpl[0] in ignore_on_x_axis:
             limit_x = len(dftemp) if len(dftemp) > limit_x else limit_x
 
 dftemp_provinces = pd.merge(dftemp_provinces,dftemp_capita_rows,left_index=True,right_index=True)
@@ -144,6 +147,10 @@ for name,df_country in dftemp_countries.groupby('Country_Region',sort=False):
     dftemp[(row + ' (percapita)')] = df_country[row] / (population/capita)
     dftemp['name'] = name
     per_capita_max = dftemp[(row + ' (percapita)')].max()
+    if (only_forced_countries):
+        if (name not in force_countries):
+            print("Skipping unforced ", name)
+            continue
     if (per_capita_max < min_percapita and name in force_countries):
         actually_forced_countries.append(name)
         print("Forcing", name)
@@ -184,7 +191,7 @@ fig, ax = plt.subplots(1,1)
 
 for name,df_country in df_result.groupby('name',sort=False):
     #print(name,df_country['Confirmed (percapita)'].max())
-    lines += 1
+    #lines += 1
     x = np.arange(len(df_country))
     y = df_country[(row + ' (percapita)')]
 
@@ -193,41 +200,54 @@ for name,df_country in df_result.groupby('name',sort=False):
     plt.annotate(name, xy=(annotate_x, annotate_y))
 
     plt.plot(x, y,label=name)
-
+    
+plt.tight_layout()
 plt.title(f"COVID-19 {row_stringoutput_plural} per capita by country")
 plt.xlabel(f"Days since {start_from}th {row_stringoutput_singular}\nnot all days shown: " + ", ".join(actually_ignored_on_x_axis))
-plt.ylabel(f"{row_stringoutput_plural} per {capita} capita\nmininum: {min_percapita} - except " + ", ".join(actually_forced_countries)) 
+plt.ylabel(f"{row_stringoutput_plural} per {capita} capita\nmininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries)) 
 plt.xticks(np.arange(limit_x))
 if (row == 'Confirmed'):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_minor_locator(ticker.MultipleLocator(5))
-plt.legend(loc='upper left',ncol=2,framealpha=1)
-plt.grid(axis='y')
+plt.legend(loc='upper left',ncol=2,framealpha=0.8)
+plt.grid()
 plt.show()
 
 """
 #pct_change
 # sum up states 
-limit_x = 60
-dftemp_pct = df_source.groupby(['Country_Region','Date'],sort=False,as_index=False).sum()
+#lines = 0 # for color computation
+limit_x = 26
+dftemp_pct = df_source.groupby(['Country_Region','Date'],sort='Date',as_index=False).sum()
+
+#sns.set_palette(sns.color_palette('YlOrBr_d', 10))
+#sns.set_style('ticks') 
+#fig, ax = plt.subplots(1,1) 
 
 for name,df_country in dftemp_pct.groupby('Country_Region',sort=False):
-    if (df_country.Deaths.max() > min_cases): # removing all countries with fewer than min_cases
-        df_country = df_country.head(limit_x) # limiting data to limit_x
-        x = np.arange(len(df_country)))
-        y = df_country.Deaths.pct_change() * 100
-        y = smooth(y,moving_average)
-        #y = group.Confirmed
-        annotate_x=max(x) #last one (index 0)
-        annotate_y=y[-1] #last one
-        plt.annotate(name, xy=(annotate_x, annotate_y))
-        plt.plot(x, y,label=name)
+    if (only_forced_countries):
+        if (name not in force_countries):
+            print("Skipping unforced ", name)
+            continue
+    elif (df_country[row].max() < min_cases):
+        continue # removing all unforced countries with fewer than min_cases
+    df_country = df_country.head(limit_x) # limiting data to limit_x
+    x = np.arange(len(df_country))
+    y = df_country[row].pct_change() * 100
+    y = smooth(y,moving_average)[:len(df_country)]
+    #y = group.Confirmed
+
+    annotate_x=max(x) #last one (index 0)
+    annotate_y=y[-1] #last one
+    plt.annotate(name, xy=(annotate_x, annotate_y))
+    plt.plot(x, y,label=name)
+    
 
 plt.xlabel(f"Days since {start_from}th {row_stringoutput_singular}")
 plt.ylabel(f"Percent daily grow of {row_stringoutput_plural} (moving average {moving_average})") 
-plt.xticks(np.arange(limit_x))
+plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
 plt.legend(loc='upper right',ncol=2,framealpha=1)
-plt.grid(axis='y')
+plt.grid()
 plt.show()
 """
 

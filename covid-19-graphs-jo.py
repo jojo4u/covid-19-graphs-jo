@@ -33,13 +33,13 @@ pop_year = '2018'       #column from World Bank data,
 moving_average = 9      #smoothing 
 
 # Do not show all days from following countries
-ignore_on_x_axis = ['China','Singapore','Korea, South']
+ignore_on_x_axis = ['China','Singapore','Korea, South','Singapore','Japan']
 # Cruise Ship has extreme numbers and skews graph
 ignore_countries = ['Cruise Ship']
 # San Marino has extreme numbers and skews graph
 ignore_countries_percapita = ['San Marino']
 # Always add following countries
-force_countries = ['Germany','Austria','Switzerland','France','Canada','US','Italy','Spain','Korea, South','Japan']
+force_countries = ['Germany','Austria','Switzerland','France','Canada','US','Italy','Spain','Korea, South','Japan','Singapore']
 #force_countries = ['US']
 only_forced_countries = False
 
@@ -52,10 +52,11 @@ indicator_name_percapita_max = indicator_name + " (percapita) max"
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import seaborn as sns
 import numpy as np
 import math
 import warnings
-import seaborn as sns
+from textwrap import fill
 
 csv_pop_countries_file = "./population/worldbank-population-2020-03-14.csv"
 csv_pop_provinces_file = "./population/province_state-population-2020-03-17.csv"
@@ -200,16 +201,22 @@ if (mode == "per_capita"):
         x = np.arange(length)
         y = df_country[indicator_name_percapita]
     
-        annotate_x=length-1+0.1 #last one (index 0)
-        annotate_y=df_country[indicator_name_percapita].iloc[-1] #last one
+        # annotate last date (index 0), move 0.1 to avoid clipping marker
+        annotate_x=length-1+0.1 
+        annotate_y=df_country[indicator_name_percapita].iloc[-1] 
         plt.annotate(name, xy=(annotate_x, annotate_y))
-    
+        
+        # plot and put marker on last point
         plt.plot(x, y,label=name,marker='o',markevery=[length-1])
         
     plt.tight_layout()
-    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country")
-    plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}\nnot all days shown: " + ", ".join(actually_ignored_on_x_axis))
-    plt.ylabel(f"{indicator_stringoutput_plural} per {capita} capita\nmininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries)) 
+    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province")
+    plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
+
+    ytext=indicator_stringoutput_plural.capitalize() + f" per {capita} capita\n"
+    ytext += fill(f"Mininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),100)
+    plt.ylabel(ytext)
+
     plt.xticks(np.arange(limit_x))
     if (indicator_name == 'Confirmed'):
         ax.yaxis.set_major_locator(ticker.MultipleLocator(1))

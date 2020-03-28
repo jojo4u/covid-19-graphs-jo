@@ -14,43 +14,52 @@ check_errs()
   fi
 }
 
-echo $1
-
 case "$1" in
-        --data-update) do_Update=1; echo "do data update";;
-        *) do_Upate=0;echo "no data update";;
+  --from-CSSE) echo "data update from CSSE";;
+            *) echo "no data update";;
 esac
 
 #today=$(date +%Y-%m-%d)
 
-today=2020-03-24
+date=2020-03-27
 
-echo "output graphs for $today..."
 
-if [[ do_Update == 1 ]]; then
-  cd covid-19-data/scripts || check_errs 2 "cd data failed"
-  python ./process.py || check_errs 2 "process.py failed"
-  cd ..
-  cd ..
+
+
+if [[ $1 == "--from-CSSE" ]]; then
+  pushd .
+  cd covid-19-data/scripts || check_errs 2 "cd data/scripts failed"
+  python ./process.py || { popd; check_errs 2 "process.py failed"; }
+  popd
+else 
+  echo "data update from datasets/covid-19 git"
+  pushd .
+  cd covid-19-data || check_errs 2 "cd covid-19-data failed"
+  git stash || { popd; check_errs 2 "git stash failed"; }
+  git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
+  popd
 fi
 
+echo "output graphs for $date..."
 python ./covid-19-graphs-jo.py per_capita Confirmed || check_errs 2 "per_capita Confirmed failed"
 python ./covid-19-graphs-jo.py per_capita Deaths    || check_errs 2 "per_capita Deaths failed"
 python ./covid-19-graphs-jo.py pct_change Confirmed || check_errs 2 "pct_change Confirmed failed"
 python ./covid-19-graphs-jo.py pct_change Deaths    || check_errs 2 "pct_change Deaths failed"
 
-pingo -s9 ./output/*-$today.png #pingo is optional
+pingo -s9 ./output/*-$date.png #pingo is optional
 
-cp ./output/pct_change-confirmed-$today.png pct_change-confirmed-latest.png || check_errs 2 "cp pct_change-confirmed failed"
-cp ./output/pct_change-deaths-$today.png pct_change-deaths-latest.png       || check_errs 2 "cp pct_change-deaths failed"
-cp ./output/per_capita-confirmed-$today.png per_capita-confirmed-latest.png || check_errs 2 "cp per_capita-confirmed failed"
-cp ./output/per_capita-deaths-$today.png per_capita-confirmed-latest.png    || check_errs 2 "cp pct_change-deaths failed"
+cp ./output/pct_change-confirmed-$date.png pct_change-confirmed-latest.png || check_errs 2 "cp pct_change-confirmed failed"
+cp ./output/pct_change-deaths-$date.png    pct_change-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"
+cp ./output/per_capita-confirmed-$date.png per_capita-confirmed-latest.png || check_errs 2 "cp per_capita-confirmed failed"
+cp ./output/per_capita-deaths-$date.png    per_capita-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"
+
+paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+
+echo "done. commit?"
+read enter_val
 
 git add *.png output/*.png || check_errs 2 "git add failed"
 
-git commit -m "$today output update" || check_errs 2 "git commit failed"
-
-#put complete sound since here git push often needs user input
-paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+git commit -m "$date output update" || check_errs 2 "git commit failed"
 
 git push origin master || check_errs 2 "git push origin master failed"

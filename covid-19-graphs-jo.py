@@ -9,22 +9,24 @@ import argparse
 parser = argparse.ArgumentParser(description='COVID-19 graphs.')
 parser.add_argument('mode', choices=['per_capita', 'pct_change'], help="Mode of calculation: per capita or percent change")
 parser.add_argument('indicator', choices=['Confirmed', 'Deaths'], help="Indicator to output")
-parser.add_argument('--no-output', help="Do not save png file to output directory")
+parser.add_argument('--no-output',action='store_false', help="Do not save png file to output directory")
 
 args = parser.parse_args()
 mode = args.mode
 indicator_name = args.indicator
 print(f"Runnig mode '{mode}' and indicator '{indicator_name}'")
-if args.no_output is not None:
-    do_output = False
-else:
-    do_output = True
+#if args.no_output is not None:
+#    do_output = False
+#else:
+#    do_output = True
+
+do_output = args.no_output
 
 if (indicator_name == "Confirmed"):
     # for per_capita plot:
     start_from = 50     #starting plot from nths case
     capita =  10000     #divisor on confirmed cases
-    min_percapita = 1   #minimum ratio of confirmed cases
+    min_percapita = 3   #minimum ratio of confirmed cases
     indicator_stringoutput_plural = "confirmed cases" 
     indicator_stringoutput_singular = "confirmed case"
     
@@ -49,7 +51,7 @@ moving_average = 9      #smoothing
 # Do not show all days from following countries
 ignore_on_x_axis = ['China','Singapore','Korea, South','Singapore','Japan']
 # Cruise Ship has extreme numbers and skews graph
-ignore_countries = ['Cruise Ship']
+ignore_countries = ['Diamond Princess']
 # San Marino has extreme numbers and skews graph
 ignore_countries_percapita = ['San Marino']
 # Always add following countries
@@ -73,7 +75,7 @@ import warnings
 from textwrap import fill
 
 csv_pop_countries_file = "./population/worldbank-population-2020-03-14.csv"
-csv_pop_provinces_file = "./population/province_state-population-2020-03-17.csv"
+csv_pop_provinces_file = "./population/province_state-population-2020-03-28.csv"
 csv_file = "./covid-19-data/data/time-series-19-covid-combined.csv"
 
 def smooth(y, box_pts):
@@ -134,7 +136,7 @@ if (mode == "per_capita"):
             population = df_pop_provinces.loc[country_province_nametpl]['Population']
         else:
             population = np.nan
-            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}")
+            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}", stacklevel=2)
         #print(nametuple,population)
         dftemp = pd.DataFrame()
         dftemp[indicator_name_percapita] = df_countrystate[indicator_name] / (population/capita)
@@ -163,7 +165,7 @@ if (mode == "per_capita"):
             population = df_pop_countries.loc[name][pop_year]
         else:
             population = np.nan
-            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}")
+            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}", stacklevel=2)
         dftemp = pd.DataFrame()
         dftemp[indicator_name_percapita] = df_country[indicator_name] / (population/capita)
         dftemp['name'] = name
@@ -227,7 +229,7 @@ if (mode == "per_capita"):
         plt.plot(x, y,label=name,marker='o',markevery=[length-1])
         
     #plt.tight_layout()
-    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province")
+    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province (data {data_date})")
     plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
 
     ytext=indicator_stringoutput_plural.capitalize() + f" per {capita} capita\n"
@@ -238,7 +240,10 @@ if (mode == "per_capita"):
     if (indicator_name == 'Confirmed'):
         ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.5))
-    plt.legend(loc='upper left',ncol=2,framealpha=0.6)
+    if (indicator_name == "Confirmed"):
+        plt.legend(bbox_to_anchor=(1.04,1), loc="upper left")
+    else:
+        plt.legend(loc='upper left',ncol=2,framealpha=0.6)
     plt.grid()
     if (do_output):
         output_file = "./output/" + mode + "-" + indicator_name.lower() + "-" + data_date
@@ -270,18 +275,17 @@ elif (mode == "pct_change"):
         x = np.arange(len(df_country))
         y = df_country[indicator_name].pct_change() * 100
         y = smooth(y,moving_average)[:len(df_country)]
-        #y = group.Confirmed
     
         annotate_x=max(x) #last one (index 0)
         annotate_y=y[-1] #last one
         plt.annotate(name, xy=(annotate_x, annotate_y))
-        plt.plot(x, y,label=name)
+        plt.plot(x, y,label=name,markevery=[len(df_country)-1])
         
-    
+    plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province (data {data_date})")
     plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}")
     plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} (moving average {moving_average})") 
     plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
-    plt.legend(loc='upper right',ncol=2,framealpha=1)
+    plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")
     plt.grid()
     if (do_output):
         output_file = "./output/" + mode + "-" + indicator_name.lower() + "-" + data_date

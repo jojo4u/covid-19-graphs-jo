@@ -19,9 +19,11 @@ case "$1" in
             *) echo "no data update";;
 esac
 
-#today=$(date +%Y-%m-%d)
+date=$(date -d "yesterday 13:00" '+%Y-%m-%d')
 
-date=2020-03-27
+echo "update for $date"
+
+#date=2020-03-27
 
 
 
@@ -46,6 +48,7 @@ python ./covid-19-graphs-jo.py per_capita Deaths    || check_errs 2 "per_capita 
 python ./covid-19-graphs-jo.py pct_change Confirmed || check_errs 2 "pct_change Confirmed failed"
 python ./covid-19-graphs-jo.py pct_change Deaths    || check_errs 2 "pct_change Deaths failed"
 
+echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional
 
 cp ./output/pct_change-confirmed-$date.png pct_change-confirmed-latest.png || check_errs 2 "cp pct_change-confirmed failed"
@@ -55,7 +58,7 @@ cp ./output/per_capita-deaths-$date.png    per_capita-deaths-latest.png    || ch
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
-echo "done. commit?"
+echo "done. commit and push?"
 read enter_val
 
 git add *.png output/*.png || check_errs 2 "git add failed"

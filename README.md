@@ -18,6 +18,13 @@ See requirements.txt for modules.
 ## For data update:
 ```
 $ cd covid-19-data
-$ python process.py
+$ git pull
 ```
+or directly from CSSE
+
+```
+$ cd covid-19-data/scripts
+$ python ./process.py
+```
+
 See requirements.txt for modules.

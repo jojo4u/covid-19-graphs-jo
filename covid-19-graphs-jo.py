@@ -55,11 +55,9 @@ ignore_countries = ['Diamond Princess']
 # San Marino has extreme numbers and skews graph
 ignore_countries_percapita = ['San Marino']
 # Always add following countries
-force_countries = ['Germany','Austria','Switzerland','France','US','United Kingdom','Italy','Spain','Korea, South','Japan','Singapore']
+force_countries = ['Germany','Austria','Switzerland','France','US','United Kingdom','Italy','Spain','Korea, South','Japan','Singapore','Taiwan*']
 #force_countries = ['US']
 only_forced_countries = False
-
-skip_US_counties = True
 
 limit_x = 0  # limiting x-axis (depending on ignore_on_x_axis) 
 indicator_name_percapita = indicator_name + " (percapita)"
@@ -129,9 +127,6 @@ if (mode == "per_capita"):
     for country_province_nametpl,df_countrystate in dftemp_provinces.groupby(['Country_Region','Province_State'],sort=False):
         if has_duplicates(country_province_nametpl): # skip mainlands (covered by countries)
             continue
-        if skip_US_counties:
-            if (country_province_nametpl[0] == "US" and "," in country_province_nametpl[1]): # US counties have comma in name
-                continue
         if (country_province_nametpl in df_pop_provinces.index):
             population = df_pop_provinces.loc[country_province_nametpl]['Population']
         else:
@@ -253,10 +248,11 @@ if (mode == "per_capita"):
         plt.show()
 
 elif (mode == "pct_change"):
-    #lines = 0 # for color computation
-    limit_x = 26
     # sum up states 
     dftemp_pct = df_source.groupby(['Country_Region','Date'],sort='Date',as_index=False).sum()
+
+    #TODO pegging length to Italy
+    limit_x = len(dftemp_pct[dftemp_pct['Country_Region'] == 'Italy'])
     
     #sns.set_palette(sns.color_palette('YlOrBr_d', 10))
     #sns.set_style('ticks') 
@@ -271,7 +267,11 @@ elif (mode == "pct_change"):
                 continue
         elif (df_country[indicator_name].max() < min_cases):
             continue # removing all unforced countries with fewer than min_cases
+
+
         df_country = df_country.head(limit_x) # limiting data to limit_x
+        
+        #len(df_country) can be smaller than limit_x
         x = np.arange(len(df_country))
         y = df_country[indicator_name].pct_change() * 100
         y = smooth(y,moving_average)[:len(df_country)]
@@ -279,10 +279,10 @@ elif (mode == "pct_change"):
         annotate_x=max(x) #last one (index 0)
         annotate_y=y[-1] #last one
         plt.annotate(name, xy=(annotate_x, annotate_y))
-        plt.plot(x, y,label=name,markevery=[len(df_country)-1])
+        plt.plot(x, y,label=name,marker='o',markevery=[len(df_country)-1])
         
     plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province (data {data_date})")
-    plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}")
+    plt.xlabel(f"Days since first {indicator_stringoutput_singular}, limit days to Italy")
     plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} (moving average {moving_average})") 
     plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")

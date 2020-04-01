@@ -23,10 +23,12 @@ print(f"Runnig mode '{mode}' and indicator '{indicator_name}'")
 do_output = args.no_output
 
 if (indicator_name == "Confirmed"):
-    # for per_capita plot:
+    # for all plots:
     start_from = 50     #starting plot from nths case
+    
+    # for per_capita plot:
     capita =  10000     #divisor on confirmed cases
-    min_percapita = 3   #minimum ratio of confirmed cases
+    min_percapita = 4   #minimum ratio of confirmed cases
     indicator_stringoutput_plural = "confirmed cases" 
     indicator_stringoutput_singular = "confirmed case"
     
@@ -34,8 +36,10 @@ if (indicator_name == "Confirmed"):
     min_cases = 1000    #only most affected countries 
 
 elif (indicator_name == "Deaths"):
-    # for per_capita plot:
+    # for all plots:
     start_from = 3      #starting plot from nths death
+
+    # for per_capita plot:
     capita =  100000    #divisor on deaths
     min_percapita = 1   #minimum ratio of deaths
     indicator_stringoutput_plural = "deaths" 
@@ -268,7 +272,6 @@ elif (mode == "pct_change"):
         elif (df_country[indicator_name].max() < min_cases):
             continue # removing all unforced countries with fewer than min_cases
 
-
         df_country = df_country.head(limit_x) # limiting data to limit_x
         
         #len(df_country) can be smaller than limit_x
@@ -283,7 +286,7 @@ elif (mode == "pct_change"):
         
     plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province (data {data_date})")
     plt.xlabel(f"Days since first {indicator_stringoutput_singular}, limit days to Italy")
-    plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} (moving average {moving_average})") 
+    plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} - minimum: {min_cases} - moving average: {moving_average}") 
     plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")
     plt.grid()

@@ -48,6 +48,10 @@ python ./covid-19-graphs-jo.py per_capita Deaths    || check_errs 2 "per_capita 
 python ./covid-19-graphs-jo.py pct_change Confirmed || check_errs 2 "pct_change Confirmed failed"
 python ./covid-19-graphs-jo.py pct_change Deaths    || check_errs 2 "pct_change Deaths failed"
 
+paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+
+echo "compress, commit and push?"
+read enter_val
 echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional
 
@@ -56,10 +60,6 @@ cp ./output/pct_change-deaths-$date.png    pct_change-deaths-latest.png    || ch
 cp ./output/per_capita-confirmed-$date.png per_capita-confirmed-latest.png || check_errs 2 "cp per_capita-confirmed failed"
 cp ./output/per_capita-deaths-$date.png    per_capita-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"
 
-paplay /usr/share/sounds/freedesktop/stereo/complete.oga
-
-echo "done. commit and push?"
-read enter_val
 
 git add *.png output/*.png || check_errs 2 "git add failed"
 

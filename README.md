@@ -5,6 +5,11 @@ COVID-19 graphs - especially cases per capita and growth.
 
 ![COVID-19 deaths per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/per_capita-deaths-latest.png)
 
+![COVID-19 confirmed percent change by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/pct_change-confirmed-latest.png)
+
+![COVID-19 deaths percent change by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/pct_change-deaths-latest.png)
+
+
 ## Run
 ```
 $ git clone https://github.com/jojo4u/covid-19-graphs-jo.git

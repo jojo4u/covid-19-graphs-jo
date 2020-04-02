@@ -24,7 +24,8 @@ do_output = args.no_output
 
 if (indicator_name == "Confirmed"):
     # for all plots:
-    start_from = 50     #starting plot from nths case
+    start_from_default = 10     #starting plot from nths case
+    start_from_ratio = 1000000 #starting plot when one in this number is confirmed (if larger than start_from_default)
     
     # for per_capita plot:
     capita =  10000     #divisor on confirmed cases
@@ -33,11 +34,12 @@ if (indicator_name == "Confirmed"):
     indicator_stringoutput_singular = "confirmed case"
     
     # for confirmed and pct_change plot
-    min_cases = 1000    #only most affected countries 
+    min_cases = 2000    #only most affected countries 
 
 elif (indicator_name == "Deaths"):
     # for all plots:
-    start_from = 3      #starting plot from nths death
+    start_from_default = 3      #starting plot from nths death
+    start_from_ratio = 10000000 #starting plot when one in this number is dead (if larger than start_from_default)
 
     # for per_capita plot:
     capita =  100000    #divisor on deaths
@@ -46,7 +48,7 @@ elif (indicator_name == "Deaths"):
     indicator_stringoutput_singular = "death"
 
     # for confirmed and pct_change plot:
-    min_cases = 20       #only most affected countries 
+    min_cases = 50       #only most affected countries 
 
 pop_year = '2018'       #column from World Bank data,
 # for pct_change plot
@@ -107,9 +109,6 @@ df_source.columns = cols
 # dop unused columns
 df_source = df_source.drop(columns=['Lat', 'Long'])
 
-# removing all entries lower than start_from
-df_source = df_source[df_source[indicator_name] >= start_from] 
-
 #removing ignored countries
 df_source = df_source[~df_source['Country_Region'].isin(ignore_countries)]
 
@@ -133,10 +132,16 @@ if (mode == "per_capita"):
             continue
         if (country_province_nametpl in df_pop_provinces.index):
             population = df_pop_provinces.loc[country_province_nametpl]['Population']
+            start_from = math.ceil(population / start_from_ratio) # round up
+            if (start_from < start_from_default and indicator_name == 'Confirmed'):
+                start_from = start_from_default
         else:
             population = np.nan
-            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}", stacklevel=2)
+            start_from = start_from_default
+            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}. Start from {start_from_default}st case.", stacklevel=2)
+        # copy to avoid SettingWithCopyWarning
         dftemp = dftemp.copy()
+        dftemp = dftemp[dftemp[indicator_name] >= start_from] 
         dftemp[indicator_name_percapita] = dftemp[indicator_name] / (population/capita)
         dftemp['name'] = country_province_nametpl[0] + " - " + country_province_nametpl[1]
         per_capita_max = dftemp[indicator_name_percapita].max()
@@ -158,11 +163,16 @@ if (mode == "per_capita"):
     for name,dftemp in df_source_countries.groupby('Country_Region',sort=False):
         if (name in df_pop_countries.index):
             population = df_pop_countries.loc[name][pop_year]
+            start_from = math.ceil(population / start_from_ratio) # round up
+            if (start_from < start_from_default and indicator_name == 'Confirmed'):
+                start_from = start_from_default
         else:
+            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}. Start from {start_from_default}st case.", stacklevel=2)
             population = np.nan
-            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}", stacklevel=2)
-        
+            start_from = 10
+        # copy to avoid SettingWithCopyWarning
         dftemp = dftemp.copy()
+        dftemp = dftemp[dftemp[indicator_name] >= start_from]  
         dftemp[indicator_name_percapita] = dftemp[indicator_name] / (population/capita)
         dftemp['name'] = name
         per_capita_max = dftemp[indicator_name_percapita].max()
@@ -198,7 +208,6 @@ if (mode == "per_capita"):
     
     # plot combined country/province data
     # palettes recommendations:
-    #   YlOrBr_d OrRd_d Oranges_d copper RdPu_d magma viridis plasma spring 
     sns.set_palette(sns.color_palette('YlOrBr_d', lines))
     sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
@@ -221,7 +230,7 @@ if (mode == "per_capita"):
         plt.plot(x, y,label=name,marker='o',markevery=[length-1])
         
     plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province (data {data_date})")
-    plt.xlabel(f"Days since {start_from}th {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
+    plt.xlabel(f"Days since one in {start_from_ratio} {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
 
     ytext=indicator_stringoutput_plural.capitalize() + f" per {capita} capita\n"
     ytext += fill(f"Mininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),100)
@@ -242,14 +251,20 @@ if (mode == "per_capita"):
         plt.show()
 
 elif (mode == "pct_change"):
-    # sum up states 
+    # removing all entries lower than start_from
+    df_source = df_source[df_source[indicator_name] >= start_from_default] 
+    
     dftemp_pct = df_source.groupby(['Country_Region','Date'],sort='Date',as_index=False).sum()
 
-    #TODO pegging length to Italy
-    limit_x = len(dftemp_pct[dftemp_pct['Country_Region'] == 'Italy'])
+    #TODO
+    if (indicator_name == 'Confirmed'):
+        limit_x = 65
+    else:
+        limit_x = 40
     
-    #sns.set_palette(sns.color_palette('YlOrBr_d', 10))
-    #sns.set_style('ticks') 
+    #TODO
+    sns.set_palette(sns.color_palette('nipy_spectral',25))
+    sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
     if (do_output):
         fig = plt.figure(figsize=(12,7))
@@ -273,9 +288,10 @@ elif (mode == "pct_change"):
         annotate_y=y[-1] #last one
         plt.annotate(name, xy=(annotate_x, annotate_y))
         plt.plot(x, y,label=name,marker='o',markevery=[len(df_country)-1])
-        
+     
+    #TODO actually ignored countries
     plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province (data {data_date})")
-    plt.xlabel(f"Days since first {indicator_stringoutput_singular}, limit days to Italy")
+    plt.xlabel(f"Days since first {indicator_stringoutput_singular}\nLimited to 50")
     plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} - minimum: {min_cases} - moving average: {moving_average}") 
     plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")

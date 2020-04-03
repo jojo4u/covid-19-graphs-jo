@@ -29,7 +29,7 @@ if (indicator_name == "Confirmed"):
     
     # for per_capita plot:
     capita =  10000     #divisor on confirmed cases
-    min_percapita = 4   #minimum ratio of confirmed cases
+    min_percapita = 5   #minimum ratio of confirmed cases
     indicator_stringoutput_plural = "confirmed cases" 
     indicator_stringoutput_singular = "confirmed case"
     
@@ -57,7 +57,7 @@ moving_average = 9      #smoothing
 # Do not show all days from following countries
 ignore_on_x_axis = ['China','Singapore','Korea, South','Singapore','Japan']
 # Cruise Ship has extreme numbers and skews graph
-ignore_countries = ['Diamond Princess']
+ignore_countries = ['Diamond Princess','MS Zaandam']
 # San Marino has extreme numbers and skews graph
 ignore_countries_percapita = ['San Marino']
 # Always add following countries
@@ -138,7 +138,7 @@ if (mode == "per_capita"):
         else:
             population = np.nan
             start_from = start_from_default
-            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}. Start from {start_from_default}st case.", stacklevel=2)
+            warnings.warn(f"Population for {country_province_nametpl} not found in {csv_pop_provinces_file}. Start from {start_from_default}. case.", stacklevel=2)
         # copy to avoid SettingWithCopyWarning
         dftemp = dftemp.copy()
         dftemp = dftemp[dftemp[indicator_name] >= start_from] 
@@ -167,7 +167,7 @@ if (mode == "per_capita"):
             if (start_from < start_from_default and indicator_name == 'Confirmed'):
                 start_from = start_from_default
         else:
-            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}. Start from {start_from_default}st case.", stacklevel=2)
+            warnings.warn(f"Population for {name} not found in {csv_pop_countries_file}. Start from {start_from_default}. case.", stacklevel=2)
             population = np.nan
             start_from = 10
         # copy to avoid SettingWithCopyWarning
@@ -189,20 +189,20 @@ if (mode == "per_capita"):
             if not name in ignore_on_x_axis:
                 limit_x = len(dftemp) if len(dftemp) > limit_x else limit_x
     
-    # need to limiting data to limit_x before sorting
-    dftemp_limit = pd.DataFrame()
-    for name,df_country in df_result.groupby('name',sort=False):
+    # need to limit data to limit_x before sorting
+    dftemp_limit = df_result.copy()
+    df_result = pd.DataFrame()
+    for name,dftemp in dftemp_limit.groupby('name',sort=False):
          # copy to avoid SettingWithCopyWarning
-         df_country = df_country.copy()
+         dftemp = dftemp.copy()
          # limit x-axis
-         if (len(df_country) > limit_x):
-             df_country = df_country.head(limit_x)
+         if (len(dftemp) > limit_x):
+             dftemp = dftemp.head(limit_x)
              actually_ignored_on_x_axis.append(name)
          #recalulate percapita max for better order in legend
-         df_country[indicator_name_percapita_max] = df_country[indicator_name_percapita].max()
-         dftemp_limit = dftemp_limit.append(df_country)
+         dftemp[indicator_name_percapita_max] = dftemp[indicator_name_percapita].max()
+         df_result = df_result.append(dftemp)
     
-    df_result = dftemp_limit            
     # sort by maximum ratio for a sorted legend
     df_result = df_result.sort_values(by=[indicator_name_percapita_max,'name','Date'],ascending=[False,True,True],ignore_index=True)
     
@@ -214,25 +214,26 @@ if (mode == "per_capita"):
     if (do_output):
         fig = plt.figure(figsize=(12,7))
     
-    for name,df_country in df_result.groupby('name',sort=False):
+    for name,dftemp in df_result.groupby('name',sort=False):
         #print(name,df_country['Confirmed (percapita)'].max())
         #lines += 1
-        length = len(df_country)
+        length = len(dftemp)
         x = np.arange(length)
-        y = df_country[indicator_name_percapita]
+        y = dftemp[indicator_name_percapita]
     
         # annotate last date (index 0), move 0.1 to avoid clipping marker
         annotate_x=length-1+0.1 
-        annotate_y=df_country[indicator_name_percapita].iloc[-1] 
+        annotate_y=dftemp[indicator_name_percapita].iloc[-1] 
         plt.annotate(name, xy=(annotate_x, annotate_y))
         
         # plot and put marker on last point
         plt.plot(x, y,label=name,marker='o',markevery=[length-1])
         
-    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province (data {data_date})")
+    plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province for {data_date}")
     plt.xlabel(f"Days since one in {start_from_ratio} {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
 
     ytext=indicator_stringoutput_plural.capitalize() + f" per {capita} capita\n"
+    ytext += f"Ignored countries: " + ",".join(ignore_countries_percapita) + "\n"
     ytext += fill(f"Mininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),100)
     plt.ylabel(ytext)
 
@@ -290,9 +291,9 @@ elif (mode == "pct_change"):
         plt.plot(x, y,label=name,marker='o',markevery=[len(df_country)-1])
      
     #TODO actually ignored countries
-    plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province (data {data_date})")
-    plt.xlabel(f"Days since first {indicator_stringoutput_singular}\nLimited to 50")
-    plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural} - minimum: {min_cases} - moving average: {moving_average}") 
+    plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province for {data_date}")
+    plt.xlabel(f"Days since first {indicator_stringoutput_singular}\nLimited to {limit_x}")
+    plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural}\nMinimum: {min_cases} - moving average: {moving_average}") 
     plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")
     plt.grid()

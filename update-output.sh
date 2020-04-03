@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 check_errs()
 {
@@ -53,7 +53,7 @@ paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 echo "compress, commit and push?"
 read enter_val
 echo "compressing with pingo..."
-pingo -s9 ./output/*-$date.png #pingo is optional
+pingo -s9 ./output/*-$date.png #pingo is optional,, no check_errs
 
 cp ./output/pct_change-confirmed-$date.png pct_change-confirmed-latest.png || check_errs 2 "cp pct_change-confirmed failed"
 cp ./output/pct_change-deaths-$date.png    pct_change-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"

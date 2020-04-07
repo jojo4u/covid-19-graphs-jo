@@ -43,10 +43,12 @@ else
 fi
 
 echo "output graphs for $date..."
-python ./covid-19-graphs-jo.py per_capita Confirmed || check_errs 2 "per_capita Confirmed failed"
-python ./covid-19-graphs-jo.py per_capita Deaths    || check_errs 2 "per_capita Deaths failed"
-python ./covid-19-graphs-jo.py pct_change Confirmed || check_errs 2 "pct_change Confirmed failed"
-python ./covid-19-graphs-jo.py pct_change Deaths    || check_errs 2 "pct_change Deaths failed"
+python ./covid-19-graphs-jo.py daily_capita Confirmed      || check_errs 2 "daily_capita Confirmed failed"
+python ./covid-19-graphs-jo.py daily_capita Deaths         || check_errs 2 "daily_capita Deaths failed"
+python ./covid-19-graphs-jo.py cumulative_capita Confirmed || check_errs 2 "cumulative_capita Confirmed failed"
+python ./covid-19-graphs-jo.py cumulative_capita Deaths    || check_errs 2 "cumulative_capita Deaths failed"
+python ./covid-19-graphs-jo.py pct_change Confirmed        || check_errs 2 "pct_change Confirmed failed"
+python ./covid-19-graphs-jo.py pct_change Deaths           || check_errs 2 "pct_change Deaths failed"
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
@@ -57,10 +59,12 @@ git push --dry-run origin master
 echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional,, no check_errs
 
-cp ./output/pct_change-confirmed-$date.png pct_change-confirmed-latest.png || check_errs 2 "cp pct_change-confirmed failed"
-cp ./output/pct_change-deaths-$date.png    pct_change-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"
-cp ./output/per_capita-confirmed-$date.png per_capita-confirmed-latest.png || check_errs 2 "cp per_capita-confirmed failed"
-cp ./output/per_capita-deaths-$date.png    per_capita-deaths-latest.png    || check_errs 2 "cp pct_change-deaths failed"
+cp ./output/daily_capita-confirmed-$date.png      daily_capita-confirmed-latest.png      || check_errs 2 "cp daily_capita-confirmed failed"
+cp ./output/daily_capita-deaths-$date.png         daily_capita-deaths-latest.png         || check_errs 2 "cp daily_capita-deaths failed"
+cp ./output/cumulative_capita-confirmed-$date.png cumulative_capita-confirmed-latest.png || check_errs 2 "cp cumulative_capita-confirmed failed"
+cp ./output/cumulative_capita-deaths-$date.png    cumulative_capita-deaths-latest.png    || check_errs 2 "cp cumulative_change-deaths failed"
+cp ./output/pct_change-confirmed-$date.png        pct_change-confirmed-latest.png        || check_errs 2 "cp pct_change-confirmed failed"
+cp ./output/pct_change-deaths-$date.png           pct_change-deaths-latest.png           || check_errs 2 "cp pct_change-deaths failed"
 
 
 git add *.png output/*.png || check_errs 2 "git add failed"

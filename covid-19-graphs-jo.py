@@ -259,9 +259,9 @@ elif (mode == "pct_change"):
 
     #TODO
     if (indicator_name == 'Confirmed'):
-        limit_x = 65
+        limit_x = 70
     else:
-        limit_x = 40
+        limit_x = 45
     
     #TODO
     sns.set_palette(sns.color_palette('nipy_spectral',25))
@@ -294,7 +294,7 @@ elif (mode == "pct_change"):
     plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province for {data_date}")
     plt.xlabel(f"Days since first {indicator_stringoutput_singular}\nLimited to {limit_x}")
     plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural}\nMinimum: {min_cases} - moving average: {moving_average}") 
-    plt.xticks(np.arange(math.ceil(moving_average/2),limit_x))
+    plt.xticks(np.arange(10,limit_x,5))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")
     plt.grid()
     if (do_output):

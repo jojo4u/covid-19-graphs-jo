@@ -52,6 +52,8 @@ paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
 echo "compress, commit and push?"
 read enter_val
+echo "storing git password..."
+git push --dry-run origin master
 echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional,, no check_errs
 
@@ -66,3 +68,5 @@ git add *.png output/*.png || check_errs 2 "git add failed"
 git commit -m "$date output update" || check_errs 2 "git commit failed"
 
 git push origin master || check_errs 2 "git push origin master failed"
+
+paplay /usr/share/sounds/freedesktop/stereo/complete.oga

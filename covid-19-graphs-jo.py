@@ -7,7 +7,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='COVID-19 graphs.')
-parser.add_argument('mode', choices=['daily_capita','cumulative_capita', 'pct_change'], help="Mode of calculation: per capita or percent change")
+parser.add_argument('mode', choices=['daily_capita','cumulative_capita', 'pct_change'], help="Mode of calculation: per capita daily/cumulative or percent change")
 parser.add_argument('indicator', choices=['Confirmed', 'Deaths'], help="Indicator to output")
 parser.add_argument('--no-output',action='store_false', help="Do not save png file to output directory")
 
@@ -15,10 +15,6 @@ args = parser.parse_args()
 mode = args.mode
 indicator_name = args.indicator
 print(f"Runnig mode '{mode}' and indicator '{indicator_name}'")
-#if args.no_output is not None:
-#    do_output = False
-#else:
-#    do_output = True
 
 do_output = args.no_output
 
@@ -46,6 +42,7 @@ if (indicator_name == "Confirmed"):
         min_cases = 2000    #only most affected countries
         indicator_stringoutput_plural = "confirmed cases" 
         indicator_stringoutput_singular = "confirmed case"
+        ignore_countries_extra = ['Qatar']
 elif (indicator_name == "Deaths"):
     # for all plots:
     start_from_default = 3      #starting plot from nths cumulative death
@@ -69,7 +66,7 @@ elif (indicator_name == "Deaths"):
         min_cases = 50       #only most affected countries 
         indicator_stringoutput_plural = "deaths" 
         indicator_stringoutput_singular = "death"
-        
+       
 pop_year = '2018'       #column from World Bank data,
 
 # Do not show all days from following countries
@@ -237,8 +234,9 @@ if (mode == "cumulative_capita" or mode == "daily_capita"):
     sns.set_palette(sns.color_palette('YlOrBr_d', lines))
     sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
+
     if (do_output):
-        fig = plt.figure(figsize=(12,7))
+        fig = plt.figure(figsize=(12,8.5))
     
     for name,dftemp in df_result.groupby('name',sort=False):
         #print(name,df_country['Confirmed (percapita)'].max())
@@ -267,7 +265,7 @@ if (mode == "cumulative_capita" or mode == "daily_capita"):
     ytext=indicator_stringoutput_plural.capitalize() + f" per {capita} capita"
     if (mode == 'daily_capita'):
         ytext += f" (moving average: {moving_average})"
-    ytext += f"\nIgnored countries: " + ",".join(ignore_countries_extra) + "\n"
+    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries_extra) + "\n"
     ytext += fill(f"Mininum: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),100)
     plt.ylabel(ytext)
 
@@ -302,7 +300,7 @@ elif (mode == "pct_change"):
     sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
     if (do_output):
-        fig = plt.figure(figsize=(12,7))
+        fig = plt.figure(figsize=(12,9))
         
     for name,df_country in dftemp_pct.groupby('Country_Region',sort=False):
         if (only_forced_countries):
@@ -313,21 +311,31 @@ elif (mode == "pct_change"):
             continue # removing all unforced countries with fewer than min_cases
 
         df_country = df_country.head(limit_x) # limiting data to limit_x
+        length = len(df_country)
+        
         
         #len(df_country) can be smaller than limit_x
         x = np.arange(len(df_country))
+        
         y = df_country[indicator_name].pct_change() * 100
-        y = smooth(y,moving_average)[:len(df_country)]
+        y = smooth(y,moving_average)[:length]
     
-        annotate_x=max(x) #last one (index 0)
-        annotate_y=y[-1] #last one
+        #annotate_x=max(x) #last one (index 0)
+        #annotate_y=y[-1] #last one
+        
+        annotate_y=y[int(np.ceil(length*2/3))]
+        annotate_x=int(np.ceil(length*2/3))
+        
         plt.annotate(name, xy=(annotate_x, annotate_y))
-        plt.plot(x, y,label=name,marker='o',markevery=[len(df_country)-1])
+        plt.plot(x, y,label=name,marker='o',markevery=[annotate_x])
      
     #TODO actually ignored countries
     plt.title(f"COVID-19 {indicator_stringoutput_plural} percent change by country/province for {data_date}")
     plt.xlabel(f"Days since first {indicator_stringoutput_singular}\nLimited to {limit_x}")
-    plt.ylabel(f"Percent daily grow of {indicator_stringoutput_plural}\nMinimum: {min_cases} - moving average: {moving_average}") 
+    ytext = f"Percent daily grow of {indicator_stringoutput_plural}\nMinimum: {min_cases} - moving average: {moving_average}"
+    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries_extra) + "\n"
+
+    plt.ylabel(ytext) 
     plt.xticks(np.arange(10,limit_x,5))
     plt.legend(bbox_to_anchor=(1.04,1), ncol=2, loc="upper left")
     plt.grid()

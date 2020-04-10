@@ -60,6 +60,6 @@ git add *.png output/*.png || check_errs 2 "git add failed"
 
 git commit -m "$date output update" || check_errs 2 "git commit failed"
 
-git push origin master || check_errs 2 "git push origin master failed"
+git push origin cipriancraciun-source || check_errs 2 "git push origin master failed"
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga

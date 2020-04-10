@@ -176,7 +176,6 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
             continue
         df_result = df_result.append(dftemp)
         lines += 1
-        print(name,percapita_max,cumulative_max,lines)
         if not name in ignore_on_x_axis:
             limit_x = len(dftemp) if len(dftemp) > limit_x else limit_x
 
@@ -211,8 +210,6 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
         fig = plt.figure(figsize=(12,8.5))
     
     for name,dftemp in df_result.groupby('location_label',sort=False):
-        #print(name,df_country['Confirmed (percapita)'].max())
-        #lines += 1
         length = len(dftemp)
         x = np.arange(length)
         y = dftemp[data_row_percapita]

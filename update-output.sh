@@ -14,41 +14,30 @@ check_errs()
   fi
 }
 
-case "$1" in
-  --from-CSSE) echo "data update from CSSE";;
-            *) echo "no data update";;
-esac
 
 date=$(date -d "yesterday 13:00" '+%Y-%m-%d')
+#date=2020-03-27
 
 echo "update for $date"
 
-#date=2020-03-27
 
+echo "data update from cipriancraciun/covid19-datasets.git"
+pushd .
+cd covid19-datasets || check_errs 2 "cd covid-19-data failed"
+git stash || { popd; check_errs 2 "git stash failed"; }
+git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
+popd
 
-
-
-if [[ $1 == "--from-CSSE" ]]; then
-  pushd .
-  cd covid-19-data/scripts || check_errs 2 "cd data/scripts failed"
-  python ./process.py || { popd; check_errs 2 "process.py failed"; }
-  popd
-else 
-  echo "data update from datasets/covid-19 git"
-  pushd .
-  cd covid-19-data || check_errs 2 "cd covid-19-data failed"
-  git stash || { popd; check_errs 2 "git stash failed"; }
-  git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
-  popd
-fi
+rm exports/combined/v1/values.tsv
+gunzip exports/combined/v1/values.tsv.gz
 
 echo "output graphs for $date..."
-python ./covid-19-graphs-jo.py daily_capita Confirmed      || check_errs 2 "daily_capita Confirmed failed"
-python ./covid-19-graphs-jo.py daily_capita Deaths         || check_errs 2 "daily_capita Deaths failed"
-python ./covid-19-graphs-jo.py cumulative_capita Confirmed || check_errs 2 "cumulative_capita Confirmed failed"
-python ./covid-19-graphs-jo.py cumulative_capita Deaths    || check_errs 2 "cumulative_capita Deaths failed"
-python ./covid-19-graphs-jo.py pct_change Confirmed        || check_errs 2 "pct_change Confirmed failed"
-python ./covid-19-graphs-jo.py pct_change Deaths           || check_errs 2 "pct_change Deaths failed"
+python ./covid-19-graphs-jo.py daily_capita confirmed      || check_errs 2 "daily_capita confirmed failed"
+python ./covid-19-graphs-jo.py daily_capita deaths         || check_errs 2 "daily_capita deaths failed"
+python ./covid-19-graphs-jo.py cumulative_capita confirmed || check_errs 2 "cumulative_capita confirmed failed"
+python ./covid-19-graphs-jo.py cumulative_capita deaths    || check_errs 2 "cumulative_capita deaths failed"
+#python ./covid-19-graphs-jo.py pct_change confirmed        || check_errs 2 "pct_change confirmed failed"
+#python ./covid-19-graphs-jo.py pct_change deaths           || check_errs 2 "pct_change deaths failed"
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
@@ -63,14 +52,14 @@ cp ./output/daily_capita-confirmed-$date.png      daily_capita-confirmed-latest.
 cp ./output/daily_capita-deaths-$date.png         daily_capita-deaths-latest.png         || check_errs 2 "cp daily_capita-deaths failed"
 cp ./output/cumulative_capita-confirmed-$date.png cumulative_capita-confirmed-latest.png || check_errs 2 "cp cumulative_capita-confirmed failed"
 cp ./output/cumulative_capita-deaths-$date.png    cumulative_capita-deaths-latest.png    || check_errs 2 "cp cumulative_change-deaths failed"
-cp ./output/pct_change-confirmed-$date.png        pct_change-confirmed-latest.png        || check_errs 2 "cp pct_change-confirmed failed"
-cp ./output/pct_change-deaths-$date.png           pct_change-deaths-latest.png           || check_errs 2 "cp pct_change-deaths failed"
+#cp ./output/pct_change-confirmed-$date.png        pct_change-confirmed-latest.png        || check_errs 2 "cp pct_change-confirmed failed"
+#cp ./output/pct_change-deaths-$date.png           pct_change-deaths-latest.png           || check_errs 2 "cp pct_change-deaths failed"
 
 
 git add *.png output/*.png || check_errs 2 "git add failed"
 
 git commit -m "$date output update" || check_errs 2 "git commit failed"
 
-git push origin master || check_errs 2 "git push origin master failed"
+git push origin cipriancraciun-source || check_errs 2 "git push origin master failed"
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga

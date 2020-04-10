@@ -84,7 +84,6 @@ indicator_name_percapita_sort = indicator_name + " (percapita) sort"
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import seaborn as sns
 import numpy as np
 import math
@@ -246,18 +245,23 @@ if (mode == "cumulative_capita" or mode == "daily_capita"):
         if (mode == 'daily_capita'):
             y = smooth(dftemp[indicator_name_percapita],moving_average)
             #TODO unify annotate_y (here: numpy array)
-            annotate_y=y[-1]
+            if (np.all(np.isnan(y))):
+                continue
+            # annotate max value, move 0.1 to avoid clipping marker
+            annotate_y=np.nanmax(y)
+            annotate_x=np.nanargmax(y) + 0.1
+
         elif (mode == 'cumulative_capita'):
             y = dftemp[indicator_name_percapita]
             #TODO unify annotate_y (here: PDSeries)
-            annotate_y=y.iloc[-1]             
-        # annotate last date (index 0), move 0.1 to avoid clipping marker
-        annotate_x=length-1+0.1 
+            annotate_y=y.iloc[-1]
+            # annotate last date (count from index 0), move 0.1 to avoid clipping marker
+            annotate_x=length-1+0.1 
         
         plt.annotate(name, xy=(annotate_x, annotate_y))
         
         # plot and put marker on last point
-        plt.plot(x, y,label=name,marker='o',markevery=[length-1])
+        plt.plot(x, y,label=name,marker='o',markevery=[int(annotate_x)])
         
     plt.title(f"COVID-19 {indicator_stringoutput_plural} per capita by country/province for {data_date}")
     plt.xlabel(f"Days since one in {start_from_ratio} {indicator_stringoutput_singular}\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)

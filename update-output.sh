@@ -15,21 +15,33 @@ check_errs()
 }
 
 
+case "$1" in
+  --git-pull) echo "data update by git pull";;
+           *) echo "data update by wget";;
+esac
+
 date=$(date -d "yesterday 13:00" '+%Y-%m-%d')
 #date=2020-03-27
 
 echo "update for $date"
 
-
-echo "data update from cipriancraciun/covid19-datasets.git"
 pushd .
-cd covid19-datasets || check_errs 2 "cd covid-19-data failed"
-git stash || { popd; check_errs 2 "git stash failed"; }
-git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
-popd
 
-rm exports/combined/v1/values.tsv
-gunzip exports/combined/v1/values.tsv.gz
+if [[ $1 == "--git-pull" ]]; then
+    echo "data update from GitHub cipriancraciun/covid19-datasets.git"
+    cd covid19-datasets || check_errs 2 "cd covid19-datasets failed"
+    git stash || { popd; check_errs 2 "git stash failed"; }
+    git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
+    rm exports/combined/v1/values.tsv || { popd; check_errs 2 "rm values.tsv failed"; }
+    gunzip exports/combined/v1/values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
+else
+    echo "data update by curl download from GitHub cipriancraciun/covid19-datasets.git"
+    cd covid19-datasets/exports/combined/v1/ || { popd; check_errs 2 "cd covid19-datasets/exports/combined/v1/ failed"; }
+    curl --location --remote-name "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values.tsv.gz" || { popd; check_errs 2 "curl values.tsv.gz failed"; }
+    gunzip values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
+fi
+
+popd
 
 echo "output graphs for $date..."
 python ./covid-19-graphs-jo.py daily_capita confirmed      || check_errs 2 "daily_capita confirmed failed"
@@ -60,6 +72,6 @@ git add *.png output/*.png || check_errs 2 "git add failed"
 
 git commit -m "$date output update" || check_errs 2 "git commit failed"
 
-git push origin cipriancraciun-source || check_errs 2 "git push origin master failed"
+git push origin master || check_errs 2 "git push origin master failed"
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga

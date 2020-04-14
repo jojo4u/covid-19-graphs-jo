@@ -33,12 +33,12 @@ if [[ $1 == "--git-pull" ]]; then
     git stash || { popd; check_errs 2 "git stash failed"; }
     git pull --no-edit || { popd; check_errs 2 "git pull failed"; }
     rm exports/combined/v1/values.tsv || { popd; check_errs 2 "rm values.tsv failed"; }
-    gunzip exports/combined/v1/values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
+    gunzip --force exports/combined/v1/values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
 else
     echo "data update by curl download from GitHub cipriancraciun/covid19-datasets.git"
     cd covid19-datasets/exports/combined/v1/ || { popd; check_errs 2 "cd covid19-datasets/exports/combined/v1/ failed"; }
     curl --location --remote-name "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values.tsv.gz" || { popd; check_errs 2 "curl values.tsv.gz failed"; }
-    gunzip values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
+    gunzip --force values.tsv.gz || { popd; check_errs 2 "gunzip values.tsv failed"; }
 fi
 
 popd

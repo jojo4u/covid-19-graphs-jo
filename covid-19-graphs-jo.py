@@ -246,7 +246,7 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
     ytext += fill(f"Must reach at least: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),90)
     plt.ylabel(ytext)
 
-    plt.xticks(np.arange(limit_x))
+    plt.xticks(np.arange(limit_x,step=2))
     # legend to the right of plot
     plt.legend(bbox_to_anchor=(1.04,1), loc="upper left")
     # legend in plot upper left

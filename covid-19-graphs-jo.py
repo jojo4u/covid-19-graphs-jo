@@ -31,7 +31,7 @@ if (indicator_name == 'confirmed'):
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed daily cases" 
     if (mode == 'cumulative_capita'):
-        min_percapita = 2  #minimum ratio of confirmed cases
+        min_percapita = 3  #minimum ratio of confirmed cases
         capita =  1000     #divisor on confirmed cases
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed cases" 
@@ -51,7 +51,7 @@ elif (indicator_name == 'deaths'):
         indicator_stringoutput = "daily deaths" 
         ignore_countries_extra = ['San Marino']
     if (mode == 'cumulative_capita'):
-        min_percapita = 5    #minimum ratio of deaths
+        min_percapita = 6    #minimum ratio of deaths
         capita =  100000    #divisor on deaths
         indicator_stringoutput = "deaths" 
         ignore_countries_extra = ['San Marino']
@@ -202,7 +202,10 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
     
     # plot combined country/province data
     # palettes recommendations:
-    sns.set_palette(sns.color_palette('YlOrBr_d', lines))
+    if (mode == 'daily_capita'): 
+        sns.set_palette(sns.color_palette('deep'))
+    elif (mode == 'cumulative_capita'):
+        sns.set_palette(sns.color_palette('YlOrBr_d', lines))
     sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
 

@@ -1,0 +1,117 @@
+country,province,location_label,population,source
+Australia,Australia,Australia / Australia,8089526,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,New South Wales,Australia / New South Wales,809952,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Queensland,Australia / Queensland,5095100,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,South Australia,Australia / South Australia,1751693,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Tasmania,Australia / Tasmania,534281,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Victoria,Australia / Victoria,6594804,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Western Australia,Australia / Western Australia,2621680,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Australian Capital Territory,Australia / Australian Capital Territory,426709,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Australia,Northern Territory,Australia / Northern Territory,1419630,https://en.wikipedia.org/wiki/States_and_territories_of_Australia
+Canada,Ontario,Canada / Ontario,14659616,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Quebec,Canada / Quebec,8522800,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,British Columbia,Canada / British Columbia,5105576,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Alberta,Canada / Alberta,4395586,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Manitoba,Canada / Manitoba,1373859,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Saskatchewan,Canada / Saskatchewan,1178657,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Nova Scotia,Canada / Nova Scotia,976768,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,New Brunswick,Canada / New Brunswick,780021,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Newfoundland and Labrador,Canada / Newfoundland and Labrador,521922,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Prince Edward Island,Canada / Prince Edward Island,157901,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Northwest Territories,Canada / Northwest Territories,44895,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Nunavut,Canada / Nunavut,38873,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+Canada,Yukon,Canada / Yukon,41022,https://en.wikipedia.org/wiki/List_of_Canadian_provinces_and_territories_by_population
+China,Anhui,China / Anhui,62550000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Beijing,China / Beijing,21710000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Chongqing,China / Chongqing,30750000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Fujian,China / Fujian,39110000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Gansu,China / Gansu,26260000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Guangdong,China / Guangdong,111690000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Guangxi,China / Guangxi,48850000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Guizhou,China / Guizhou,35550000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Hainan,China / Hainan,9170000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Hebei,China / Hebei,75200000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Heilongjiang,China / Heilongjiang,37890000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Henan,China / Henan,95590000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Hong Kong,China / Hong Kong,7335384,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Hubei,China / Hubei,59020000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Hunan,China / Hunan,68600000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Inner Mongolia,China / Inner Mongolia,25290000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Jiangsu,China / Jiangsu,80290000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Jiangxi,China / Jiangxi,46220000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Jilin,China / Jilin,27170000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Liaoning,China / Liaoning,43690000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Ningxia,China / Ningxia,6820000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Qinghai,China / Qinghai,5980000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Shaanxi,China / Shaanxi,38350000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Shandong,China / Shandong,100060000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Shanghai,China / Shanghai,24180000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Shanxi,China / Shanxi,36820000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Sichuan,China / Sichuan,83020000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Tianjin,China / Tianjin,15570000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Tibet,China / Tibet,3370000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Xinjiang,China / Xinjiang,24450000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Yunnan,China / Yunnan,48010000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+China,Zhejiang,China / Zhejiang,56570000,https://en.wikipedia.org/wiki/List_of_Chinese_administrative_divisions_by_population
+US,Alabama,US / Alabama,4903185,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Alaska,US / Alaska,731545,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Arizona,US / Arizona,7278717,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Arkansas,US / Arkansas,3017804,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,California,US / California,39512223,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Colorado,US / Colorado,5758736,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Connecticut,US / Connecticut,3565287,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Delaware,US / Delaware,973764,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,District of Columbia,US / District of Columbia,705749,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Florida,US / Florida,21477737,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Georgia,US / Georgia,10617423,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Hawaii,US / Hawaii,1415872,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Idaho,US / Idaho,1787065,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Illinois,US / Illinois,12671821,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Indiana,US / Indiana,6732219,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Iowa,US / Iowa,3155070,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Kansas,US / Kansas,2913314,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Kentucky,US / Kentucky,4467673,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Louisiana,US / Louisiana,4648794,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Maine,US / Maine,1344212,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Maryland,US / Maryland,6045680,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Massachusetts,US / Massachusetts,6892503,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Michigan,US / Michigan,9986857,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Minnesota,US / Minnesota,5639632,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Mississippi,US / Mississippi,2976149,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Missouri,US / Missouri,6137428,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Montana,US / Montana,1068778,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Nebraska,US / Nebraska,1934408,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Nevada,US / Nevada,3080156,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,New Hampshire,US / New Hampshire,1359711,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,New Jersey,US / New Jersey,8882190,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,New Mexico,US / New Mexico,2096829,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,New York,US / New York,19453561,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,North Carolina,US / North Carolina,10488084,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,North Dakota,US / North Dakota,762062,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Ohio,US / Ohio,11689100,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Oklahoma,US / Oklahoma,3956971,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Oregon,US / Oregon,4217737,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Pennsylvania,US / Pennsylvania,12801989,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Rhode Island,US / Rhode Island,1059361,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,South Carolina,US / South Carolina,5148714,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,South Dakota,US / South Dakota,884659,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Tennessee,US / Tennessee,6829174,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Texas,US / Texas,28995881,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Utah,US / Utah,3205958,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Vermont,US / Vermont,623989,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Virginia,US / Virginia,8535519,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Washington,US / Washington,7614893,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,West Virginia,US / West Virginia,1792147,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Wisconsin,US / Wisconsin,5822434,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Wyoming,US / Wyoming,578759,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+US,Puerto Rico,US / Puerto Rico,3193694,https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+Palestine,,Palestine,4684777,https://www.wikidata.org/wiki/Q219060
+United States Virgin Islands,,United States Virgin Islands,106792,https://www.wikidata.org/wiki/Q11703
+Mayotte,,Mayotte,256518,https://www.wikidata.org/wiki/Q17063
+British Virgin Islands,,British Virgin Islands,31758,https://www.wikidata.org/wiki/Q25305
+Caribbean Netherlands,,Caribbean Netherlands,25019,https://www.wikidata.org/wiki/Q27561
+French Guiana,,French Guiana,282731,https://www.wikidata.org/wiki/Q3769
+Guadeloupe,,Guadeloupe,390253,https://www.wikidata.org/wiki/Q17012
+Martinique,,Martinique,372594,https://www.wikidata.org/wiki/Q17054
+Reunion,,Reunion,866506,https://www.wikidata.org/wiki/Q17070
+United Kingdom,Falkland Islands,United Kingdom / Falkland Islands (Islas Malvinas),4550,https://www.wikidata.org/wiki/Q9648

@@ -44,8 +44,8 @@ fi
 popd
 
 echo "output graphs for $date..."
-python ./covid-19-graphs-jo.py daily_capita confirmed      || check_errs 2 "daily_capita confirmed failed"
-python ./covid-19-graphs-jo.py daily_capita deaths         || check_errs 2 "daily_capita deaths failed"
+python ./covid-19-graphs-jo.py weekly_capita confirmed      || check_errs 2 "weekly_capita confirmed failed"
+python ./covid-19-graphs-jo.py weekly_capita deaths         || check_errs 2 "weekly_capita deaths failed"
 python ./covid-19-graphs-jo.py cumulative_capita confirmed || check_errs 2 "cumulative_capita confirmed failed"
 python ./covid-19-graphs-jo.py cumulative_capita deaths    || check_errs 2 "cumulative_capita deaths failed"
 #python ./covid-19-graphs-jo.py pct_change confirmed        || check_errs 2 "pct_change confirmed failed"
@@ -60,10 +60,10 @@ git push --dry-run origin master
 echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional,, no check_errs
 
-cp ./output/daily_capita-confirmed-$date.png      daily_capita-confirmed-latest.png      || check_errs 2 "cp daily_capita-confirmed failed"
-cp ./output/daily_capita-deaths-$date.png         daily_capita-deaths-latest.png         || check_errs 2 "cp daily_capita-deaths failed"
-cp ./output/cumulative_capita-confirmed-$date.png cumulative_capita-confirmed-latest.png || check_errs 2 "cp cumulative_capita-confirmed failed"
-cp ./output/cumulative_capita-deaths-$date.png    cumulative_capita-deaths-latest.png    || check_errs 2 "cp cumulative_change-deaths failed"
+cp ./output/weekly_capita-confirmed-$date.png      weekly_capita-confirmed-latest.png      || check_errs 2 "cp weekly_capita-confirmed failed"
+cp ./output/weekly_capita-deaths-$date.png         weekly_capita-deaths-latest.png         || check_errs 2 "cp weekly_capita-deaths failed"
+cp ./output/cumulative_capita-confirmed-$date.png  cumulative_capita-confirmed-latest.png || check_errs 2 "cp cumulative_capita-confirmed failed"
+cp ./output/cumulative_capita-deaths-$date.png     cumulative_capita-deaths-latest.png    || check_errs 2 "cp cumulative_change-deaths failed"
 #cp ./output/pct_change-confirmed-$date.png        pct_change-confirmed-latest.png        || check_errs 2 "cp pct_change-confirmed failed"
 #cp ./output/pct_change-deaths-$date.png           pct_change-deaths-latest.png           || check_errs 2 "cp pct_change-deaths failed"
 

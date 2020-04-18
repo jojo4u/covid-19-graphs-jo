@@ -7,7 +7,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='COVID-19 graphs.')
-parser.add_argument('mode', choices=['daily_capita','cumulative_capita', 'pct_change'], help="Mode of calculation: per capita daily/cumulative or percent change")
+parser.add_argument('mode', choices=['weekly_capita','cumulative_capita', 'pct_change'], help="Mode of calculation: per capita weekly/cumulative or percent change")
 parser.add_argument('indicator', choices=['confirmed','deaths','recovered'], help="Indicator to output")
 parser.add_argument('--no-output',action='store_false', help="Do not save png file to output directory")
 
@@ -19,50 +19,55 @@ print(f"Runnig mode '{mode}' and indicator '{indicator_name}'")
 do_output = args.no_output
 
 ignore_countries_extra = []
-moving_average = 1
+
 if (indicator_name == 'confirmed'):
-    # for all plots:
-    start_from_default = 10     #starting plot from nths cumulative case
-    start_from_ratio = 1000000  #starting plot when one in this number is confirmed cumlative (if larger than start_from_default)
-    if (mode == 'daily_capita'):
-        moving_average = 5
-        min_percapita = 2   #minimum ratio of confirmed cases
-        capita =  10000     #divisor on confirmed cases
+    start_from_default = 10      #starting plot from nths cumulative case
+    start_from_ratio = 1000000   #starting plot when one in this number is confirmed cumlative (if larger than start_from_default)
+    start_from_ratio_text = "a million"
+    capita =  10000     #divisor on confirmed cases
+if (indicator_name == 'deaths'): 
+    start_from_default = 3      #starting plot from nths cumulative death
+    start_from_ratio = 10000000  #starting plot when one in this number is dead cumulative (if larger than start_from_default)
+    start_from_ratio_text = "10 million"
+    capita =  100000    #divisor on deaths
+    
+if (mode == 'weekly_capita'):
+    timespan = "Weeks"
+    steps = 1
+    if (indicator_name == 'confirmed'):
+        min_percapita = 14  #minimum ratio of confirmed cases per week
         ignore_countries_extra = []
-        indicator_stringoutput = "confirmed daily cases" 
-    if (mode == 'cumulative_capita'):
-        min_percapita = 3  #minimum ratio of confirmed cases
-        capita =  1000     #divisor on confirmed cases
+        indicator_stringoutput = "confirmed weekly cases" 
+    if (indicator_name == 'deaths'):
+        min_percapita = 7   #minimum ratio of deaths per week
+        ignore_countries_extra = ['San Marino']
+        indicator_stringoutput = "weekly deaths" 
+if (mode == 'cumulative_capita'):  
+    timespan = "Days"
+    steps = 2
+    if (indicator_name == 'confirmed'):
+        min_percapita = 30  #minimum ratio of confirmed cases
         ignore_countries_extra = []
-        indicator_stringoutput = "confirmed cases" 
-    if (mode == 'pct_change'):
+        indicator_stringoutput = "confirmed cases"   
+    if (indicator_name == 'deaths'):  
+        min_percapita = 7   #minimum ratio of deaths
+        ignore_countries_extra = ['San Marino']
+        indicator_stringoutput = "deaths" 
+if (mode == 'pct_change'):
+    ignore_countries_extra = []
+    if (indicator_name == 'confirmed'):
         moving_average = 9
         min_cases = 2000    #only most affected countries
         ignore_countries_extra = []
-        indicator_stringoutput = "confirmed cases" 
-elif (indicator_name == 'deaths'):
-    # for all plots:
-    start_from_default = 3      #starting plot from nths cumulative death
-    start_from_ratio = 10000000  #starting plot when one in this number is dead cumulative (if larger than start_from_default)
-    if (mode == 'daily_capita'):
-        moving_average = 2
-        min_percapita = 1   #minimum ratio of deaths
-        capita =  100000    #divisor on deaths
-        indicator_stringoutput = "daily deaths" 
-        ignore_countries_extra = ['San Marino']
-    if (mode == 'cumulative_capita'):
-        min_percapita = 6    #minimum ratio of deaths
-        capita =  100000    #divisor on deaths
-        indicator_stringoutput = "deaths" 
-        ignore_countries_extra = ['San Marino']
-    if (mode == 'pct_change'):
+        indicator_stringoutput = "confirmed cases"        
+    if (indicator_name == 'deaths'):
         moving_average = 9
         min_cases = 50       #only most affected countries 
         indicator_stringoutput = "deaths" 
         ignore_countries_extra = []
-       
+      
 # Do not show all days from following countries
-ignore_on_x_axis = ['China','China / Hubei','Korea, South','Japan']
+ignore_on_x_axis = ['China','China / Hubei','Korea, South','Japan','Taiwan','Japan']
 # countries to ignore completely
 ignore_countries = ['French Polynesia']
 # Always add following countries and provinces
@@ -83,12 +88,15 @@ import math
 import warnings
 import sys
 from textwrap import fill
+import locale
+
+locale.setlocale(locale.LC_ALL, '')
 
 csv_file = "./covid19-datasets/exports/combined/v1/values.tsv"
-csv_pop_provinces_file = "./population/province_state-population-2020-04-10.csv"
+csv_pop_provinces_file = "./population/province_state-population-2020-04-17.csv"
 
 df_pop_provinces = pd.read_csv(csv_pop_provinces_file,index_col=['location_label'])
-df_source = pd.read_csv(csv_file,delimiter='\t',low_memory=False,usecols=[0,3,4,5,6,7,13,23,24,25,26,35,36,37,38,39,40,41,42,52])
+df_source = pd.read_csv(csv_file,delimiter='\t',parse_dates=['date'],low_memory=False,usecols=[0,3,4,5,6,7,13,23,24,25,26,35,36,37,38,39,40,41,42,52])
 #index_col=['location_label','date']
 
 # removing unneeded data
@@ -114,13 +122,13 @@ df_source['delta_infected'].fillna(0,inplace=True)
 # df_result is used for filtered/processed data
 df_result = pd.DataFrame()
 
-data_date = df_source['date'].max()
+data_date = df_source['date'].max().date()
 print(f"Using {csv_file}, latest data from",data_date)
 
 actually_forced_countries = []
 actually_ignored_on_x_axis = []
 
-if (mode == 'cumulative_capita' or mode == 'daily_capita'):
+if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
     
     lines = 0 #for color computation
 
@@ -128,7 +136,7 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
         data_row = 'absolute_' + indicator_name 
         data_row_cumulative = data_row
         
-    elif (mode == 'daily_capita'):
+    elif (mode == 'weekly_capita'):
         data_row = 'delta_' + indicator_name
         data_row_cumulative = 'absolute_' + indicator_name 
 
@@ -149,10 +157,19 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
     
         # copy to avoid SettingWithCopyWarning
         dftemp = dftemp.copy()
+        
+        # aggregate weeks for weekly capita
+        if (mode == 'weekly_capita'):
+            old_index_start = dftemp.index[0]
+            dftemp = dftemp.resample('7D',on='date').agg({data_row:'sum',data_row_cumulative:'sum','dataset':'last','location_type':'last','location_label':'last','country_code':'last','country':'last','province':'last','factbook_population':'last'})
+            dftemp["date"] = dftemp.index
+            # apply old index in order to append this dataframe later
+            # TODO this seems clumsy
+            dftemp.index = np.arange(old_index_start,(old_index_start + len(dftemp)))
+        
         dftemp[data_row_percapita] = dftemp[data_row] / (population/capita)
         # smooth here to match maxima calculation with plot
-        #dftemp[data_row_percapita] = smooth(dftemp[data_row_percapita],moving_average)[:len(dftemp)]
-        dftemp[data_row_percapita] = dftemp[data_row_percapita].rolling(window=moving_average).mean()
+        #dftemp[data_row_percapita] = dftemp[data_row_percapita].rolling(window=moving_average).mean()
         percapita_max = dftemp[data_row_percapita].max()
         cumulative_max = dftemp[data_row_cumulative].max()
         
@@ -166,10 +183,10 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
         else:
             if (cumulative_max < start_from):
                 actually_forced_countries.append(name)
-                print("Forcing (start date): ", name)
+                print("Forcing (start date):", name)
             if (percapita_max < min_percapita):
                 actually_forced_countries.append(name)
-                print("Forcing (capita ratio): ", name)
+                print("Forcing (capita ratio):", name)
                 dftemp = dftemp[dftemp[data_row_cumulative] >= start_from]
       
         if (len(dftemp) == 0):
@@ -189,11 +206,13 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
          if (len(dftemp) > limit_x):
              dftemp = dftemp.head(limit_x)
              actually_ignored_on_x_axis.append(name)
-         if (mode == 'daily_capita'): 
-             #set max as latest value for better order in legend
+         if (mode == 'weekly_capita'): 
+             # set sort value to latest value for order in legend
+             legendtitle = "Legend - sorted descending by latest value"
              dftemp[data_row_percapita_sort] = dftemp[data_row_percapita].iloc[-1] 
          elif (mode == 'cumulative_capita'):
-             #recalulate percapita max for better order in legend
+             # set sort value percapita max for order in legend, recalulate because of limiting of x-axis
+             legendtitle = "Legend - sorted descending by max value"
              dftemp[data_row_percapita_sort] = dftemp[data_row_percapita].max()
          df_result = df_result.append(dftemp)
 
@@ -202,7 +221,7 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
     
     # plot combined country/province data
     # palettes recommendations:
-    if (mode == 'daily_capita'): 
+    if (mode == 'weekly_capita'): 
         sns.set_palette(sns.color_palette('deep'))
     elif (mode == 'cumulative_capita'):
         sns.set_palette(sns.color_palette('YlOrBr_d', lines))
@@ -217,7 +236,7 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
         x = np.arange(length)
         y = dftemp[data_row_percapita]
 
-        if (mode == 'daily_capita'):
+        if (mode == 'weekly_capita'):
             if (np.all(np.isnan(y))):
                 continue
             # annotate max value, move 0.1 to avoid clipping marker
@@ -231,32 +250,31 @@ if (mode == 'cumulative_capita' or mode == 'daily_capita'):
         
         if (np.any(dftemp['province'])):
             label = dftemp['province'].iloc[0]
+            linestyle = 'dashed'
         else:
             label = name
-        plt.annotate(label, xy=(annotate_x, annotate_y))
+            linestyle = 'solid'
+        plt.annotate(label,xy=(annotate_x, annotate_y))
         
         # plot and put marker on last point
-        plt.plot(x, y,label=name,marker='o',markevery=[int(annotate_x)])
+        plt.plot(x,y,linestyle=linestyle,label=name,marker='o',markevery=[int(annotate_x)])
         
     plt.title(f"COVID-19 {indicator_stringoutput} per capita by country/province for {data_date}")
     
-    plt.xlabel(f"Days since cumulative {indicator_name} reached one in {start_from_ratio} of population (minimum {start_from_default})\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
+    plt.xlabel(f"{timespan} since cumulative {indicator_name} reached one in {start_from_ratio_text} of population (minimum {start_from_default})\nNot all days shown: " + ", ".join(actually_ignored_on_x_axis),wrap=True)
+
 
     ytext=indicator_stringoutput.capitalize() + f" per {capita} capita"
-    if (mode == 'daily_capita'):
-        ytext += f" (moving average: {moving_average})"
-    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries_extra) + "\n"
+    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries) + "\n"
     ytext += fill(f"Must reach at least: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),90)
     plt.ylabel(ytext)
 
-    plt.xticks(np.arange(limit_x,step=2))
+    plt.xticks(np.arange(limit_x,step=steps))
     # legend to the right of plot
-    plt.legend(bbox_to_anchor=(1.04,1), loc="upper left")
-    # legend in plot upper left
-    #plt.legend(loc='upper left',ncol=2,framealpha=0.6)
+    plt.legend(bbox_to_anchor=(1.04,1), loc="upper left",title=legendtitle)
     plt.grid()
     if (do_output):
-        output_file = "./output/" + mode + "-" + indicator_name.lower() + "-" + data_date
+        output_file = "./output/" + mode + "-" + indicator_name.lower() + "-" + str(data_date)
         print(f"Writing png file to " + output_file)
         fig.savefig(output_file, dpi=200, bbox_inches='tight')
     else:
@@ -314,7 +332,7 @@ elif (mode == "pct_change"):
     #TODO Text
     plt.xlabel(f"Days since first (TODO TEXT)\nLimited to {limit_x}")
     ytext = f"Percent daily grow of {indicator_stringoutput}\nMinimum: {min_cases} - moving average: {moving_average}"
-    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries_extra) + "\n"
+    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries) + "\n"
 
     plt.ylabel(ytext) 
     plt.xticks(np.arange(10,limit_x,5))

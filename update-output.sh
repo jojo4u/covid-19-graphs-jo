@@ -53,7 +53,7 @@ python ./covid-19-graphs-jo.py cumulative_capita deaths    || check_errs 2 "cumu
 
 paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
-echo "compress, commit and push?"
+echo "compress, commit and push? (any key/Ctrl-C)"
 read enter_val
 echo "storing git password..."
 git push --dry-run origin master

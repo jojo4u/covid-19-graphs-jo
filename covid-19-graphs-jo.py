@@ -39,24 +39,24 @@ if (mode == 'weekly_capita'):
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed weekly cases" 
     if (indicator_name == 'deaths'):
-        min_percapita = 7   #minimum ratio of deaths per week
+        min_percapita = 8   #minimum ratio of deaths per week
         ignore_countries_extra = ['San Marino']
         indicator_stringoutput = "weekly deaths" 
 if (mode == 'cumulative_capita'):  
     timespan = "Days"
     steps = 2
     if (indicator_name == 'confirmed'):
-        min_percapita = 30  #minimum ratio of confirmed cases
+        min_percapita = 40  #minimum ratio of confirmed cases
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed cases"   
     if (indicator_name == 'deaths'):  
-        min_percapita = 7   #minimum ratio of deaths
+        min_percapita = 15   #minimum ratio of deaths
         ignore_countries_extra = ['San Marino']
         indicator_stringoutput = "deaths" 
 if (mode == 'pct_change'):
     ignore_countries_extra = []
     if (indicator_name == 'confirmed'):
-        moving_average = 9
+        moving_average = 12
         min_cases = 2000    #only most affected countries
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed cases"        
@@ -71,7 +71,7 @@ ignore_on_x_axis = ['China','China / Hubei','Korea, South','Japan','Taiwan','Jap
 # countries to ignore completely
 ignore_countries = ['French Polynesia']
 # Always add following countries and provinces
-force_countries = ['Germany','Austria','Switzerland','France','US','United Kingdom','Italy','Spain','Korea, South','Japan','Taiwan','China / Hubei']
+force_countries = ['Germany','Austria','Switzerland','France','United States','United Kingdom','Italy','Spain','Korea, South','Japan','Taiwan','China / Hubei','Brazil']
 #force_countries = ['US']
 # display only forced countries
 only_forced_countries = False
@@ -130,8 +130,6 @@ actually_ignored_on_x_axis = []
 
 if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
     
-    lines = 0 #for color computation
-
     if (mode == 'cumulative_capita'):
         data_row = 'absolute_' + indicator_name 
         data_row_cumulative = data_row
@@ -161,8 +159,21 @@ if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
         # aggregate weeks for weekly capita
         if (mode == 'weekly_capita'):
             old_index_start = dftemp.index[0]
+            
+            
+            
+            # reverse dftemp in order to get the last week as full bucket
+            #dftemp = dftemp.sort_values('date',ascending=False)
+            #print(dftemp['date'])
+            
             dftemp = dftemp.resample('7D',on='date').agg({data_row:'sum',data_row_cumulative:'sum','dataset':'last','location_type':'last','location_label':'last','country_code':'last','country':'last','province':'last','factbook_population':'last'})
-            dftemp["date"] = dftemp.index
+            
+            #dftemp = dftemp.sort_values('date',ascending=True)
+            #if (name == 'Zimbabwe'):
+            #    sys.exit(2)
+            
+            dftemp['date'] = dftemp.index
+            
             # apply old index in order to append this dataframe later
             # TODO this seems clumsy
             dftemp.index = np.arange(old_index_start,(old_index_start + len(dftemp)))
@@ -192,7 +203,6 @@ if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
         if (len(dftemp) == 0):
             continue
         df_result = df_result.append(dftemp)
-        lines += 1
         if not name in ignore_on_x_axis:
             limit_x = len(dftemp) if len(dftemp) > limit_x else limit_x
 
@@ -220,10 +230,11 @@ if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
     df_result = df_result.sort_values(by=[data_row_percapita_sort,'location_label','date'],ascending=[False,True,True],ignore_index=True)
     
     # plot combined country/province data
-    # palettes recommendations:
+    
     if (mode == 'weekly_capita'): 
         sns.set_palette(sns.color_palette('deep'))
     elif (mode == 'cumulative_capita'):
+        lines = len(df_result['location_label'].drop_duplicates())
         sns.set_palette(sns.color_palette('YlOrBr_d', lines))
     sns.set_style('ticks') 
     fig, ax = plt.subplots(1,1) 
@@ -265,7 +276,7 @@ if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
 
 
     ytext=indicator_stringoutput.capitalize() + f" per {capita} capita"
-    ytext += f"\nIgnored countries: " + ", ".join(ignore_countries) + "\n"
+    ytext += "\nIgnored countries: " + ", ".join(ignore_countries) + "\n"
     ytext += fill(f"Must reach at least: {min_percapita} - ignored for " + ", ".join(actually_forced_countries),90)
     plt.ylabel(ytext)
 
@@ -280,7 +291,7 @@ if (mode == 'cumulative_capita' or mode == 'weekly_capita'):
     else:
         plt.show()
 
-
+""" currently not developed further
 elif (mode == "pct_change"):
     # removing all entries lower than start_from
     df_source = df_source[df_source[indicator_name] >= start_from_default] 
@@ -344,3 +355,4 @@ elif (mode == "pct_change"):
         fig.savefig(output_file, dpi=200, bbox_inches='tight')
     else:
         plt.show()
+"""

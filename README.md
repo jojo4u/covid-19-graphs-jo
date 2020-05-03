@@ -5,9 +5,9 @@ COVID-19 graphs - especially cases per capita and growth.
 
 ![COVID-19 deaths per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/cumulative_capita-deaths-latest.png)
 
-![COVID-19 daily confirmed per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/daily_capita-confirmed-latest.png)
+![COVID-19 weekly confirmed per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/weekly_capita-confirmed-latest.png)
 
-![COVID-19 daily deaths per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/daily_capita-deaths-latest.png)
+![COVID-19 weekly deaths per capita by country"](https://github.com/jojo4u/covid-19-graphs-jo/raw/master/weekly_capita-deaths-latest.png)
 
 ## Run
 ```

@@ -46,11 +46,11 @@ if (mode == 'cumulative_capita'):
     timespan = "Days"
     steps = 2
     if (indicator_name == 'confirmed'):
-        min_percapita = 40  #minimum ratio of confirmed cases
+        min_percapita = 50  #minimum ratio of confirmed cases
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed cases"   
     if (indicator_name == 'deaths'):  
-        min_percapita = 15   #minimum ratio of deaths
+        min_percapita = 25   #minimum ratio of deaths
         ignore_countries_extra = ['San Marino']
         indicator_stringoutput = "deaths" 
 if (mode == 'pct_change'):

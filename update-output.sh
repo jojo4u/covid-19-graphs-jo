@@ -55,7 +55,7 @@ paplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
 echo "compress, commit and push? (any key/Ctrl-C)"
 read enter_val
-echo "storing git password..."
+echo "storing git password... (git dry push)"
 git push --dry-run origin master
 echo "compressing with pingo..."
 pingo -s9 ./output/*-$date.png #pingo is optional,, no check_errs

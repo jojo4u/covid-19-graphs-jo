@@ -35,22 +35,22 @@ if (mode == 'weekly_capita'):
     timespan = "Weeks"
     steps = 1
     if (indicator_name == 'confirmed'):
-        min_percapita = 14  #minimum ratio of confirmed cases per week
+        min_percapita = 12  #minimum ratio of confirmed cases per week
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed weekly cases" 
     if (indicator_name == 'deaths'):
-        min_percapita = 8   #minimum ratio of deaths per week
+        min_percapita = 3   #minimum ratio of deaths per week
         ignore_countries_extra = ['San Marino']
         indicator_stringoutput = "weekly deaths" 
 if (mode == 'cumulative_capita'):  
     timespan = "Days"
-    steps = 2
+    steps = 5
     if (indicator_name == 'confirmed'):
-        min_percapita = 50  #minimum ratio of confirmed cases
+        min_percapita = 50   #minimum ratio of confirmed cases
         ignore_countries_extra = []
         indicator_stringoutput = "confirmed cases"   
     if (indicator_name == 'deaths'):  
-        min_percapita = 25   #minimum ratio of deaths
+        min_percapita = 15   #minimum ratio of deaths
         ignore_countries_extra = ['San Marino']
         indicator_stringoutput = "deaths" 
 if (mode == 'pct_change'):
@@ -71,7 +71,7 @@ ignore_on_x_axis = ['China','China / Hubei','Korea, South','Japan','Taiwan','Jap
 # countries to ignore completely
 ignore_countries = ['French Polynesia']
 # Always add following countries and provinces
-force_countries = ['Germany','Austria','Switzerland','France','United States','United Kingdom','Italy','Spain','Korea, South','Japan','Taiwan','China / Hubei','Brazil']
+force_countries = ['Germany','United States','United Kingdom','Italy','Spain','Korea, South','Japan','Taiwan','China / Hubei','Brazil']
 #force_countries = ['US']
 # display only forced countries
 only_forced_countries = False
@@ -100,7 +100,9 @@ df_source = pd.read_csv(csv_file,delimiter='\t',parse_dates=['date'],low_memory=
 #index_col=['location_label','date']
 
 # removing unneeded data
-df_source = df_source[df_source['location_type'].isin(['total-country','total-province'])]
+warnings.warn("Skipping provinces for now", stacklevel=2)
+df_source = df_source[df_source['location_type'].isin(['total-country'])]
+#df_source = df_source[df_source['location_type'].isin(['total-country','total-province'])]
 df_source = df_source[df_source['dataset'] == 'jhu/daily']
 
 # remove JHU idiosyncrasies
